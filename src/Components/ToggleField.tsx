@@ -1,12 +1,20 @@
 import React from 'react';
-import {ColorValue, StyleSheet, Switch, View, ViewProps} from 'react-native';
+import {
+   ColorValue,
+   StyleSheet,
+   Switch,
+   View,
+   ViewProps,
+} from 'react-native';
+import {useTheme} from '../Theme';
 import {LabelText} from './Text';
 
 interface ToggleFieldProps extends ViewProps {
    value?: boolean;
    onToggle?: (value: boolean) => void;
    thumbColor?: ColorValue;
-   trackColor?: {false?: ColorValue; true?: ColorValue};
+   trackOnColor?: ColorValue;
+   trackOffColor?: ColorValue;
 }
 
 const styles = StyleSheet.create({
@@ -14,28 +22,67 @@ const styles = StyleSheet.create({
       flexDirection: 'column',
       alignItems: 'center',
    },
+   colorWorkAround: {
+      minHeight: 0,
+      padding: 0,
+      margin: 0,
+      width: 40,
+      height: 20,
+      borderRadius: 10,
+      //borderWidth: 1,
+   },
+   switchInt: {
+      padding: -1,
+      borderWidth: 0,
+      marginTop: -10,
+   },
 });
 
-export default class ToggleField extends React.Component {
-   props: ToggleFieldProps;
+export const ToggleField: React.FC<ToggleFieldProps> = (
+   props: ToggleFieldProps,
+) => {
+   const theme = useTheme();
+   const color = {
+      borderColor: theme.primary,
+   };
 
-   constructor(props: ToggleFieldProps) {
-      super(props);
-      this.props = props;
-   }
+   const thumbColor =
+      props.value === true
+         ? theme.lowlight
+         : theme.highlight;
 
-   render() {
-      return (
-         <View style={styles.vertColumn}>
+   const trackColorClear = {
+      true: '#0000',
+      false: '#0000',
+   };
+
+   const trackColorActual = {
+      borderColor: theme.primary,
+      backgroundColor:
+         props.value === true
+            ? props.trackOnColor ?? theme.highlight
+            : props.trackOffColor ?? theme.lowlight,
+   };
+
+   return (
+      <View style={styles.vertColumn}>
+         <View
+            style={[
+               styles.colorWorkAround,
+               trackColorActual,
+               props.style,
+            ]}>
             <Switch
-               style={this.props.style}
-               value={this.props.value}
-               onValueChange={this.props.onToggle}
-               thumbColor={this.props.thumbColor}
-               trackColor={this.props.trackColor}
+               style={[styles.switchInt, color]}
+               value={props.value}
+               onValueChange={props.onToggle}
+               thumbColor={thumbColor}
+               trackColor={trackColorClear}
             />
-            <LabelText>{this.props.children}</LabelText>
          </View>
-      );
-   }
-}
+         {props.children && (
+            <LabelText>{props.children}</LabelText>
+         )}
+      </View>
+   );
+};

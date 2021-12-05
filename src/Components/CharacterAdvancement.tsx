@@ -1,9 +1,14 @@
 import React from 'react';
 import {StyleSheet, View} from 'react-native';
 import {useCharacterProp} from '../useCharacter';
+import {HorizontalBar} from './Layout';
 import {NumericField} from './NumericField';
-import {BigLabelText, LabelText} from './Text';
-import ToggleField from './ToggleField';
+import {
+   BigLabelText,
+   LabelText,
+   SmallLabelText,
+} from './Text';
+import {ToggleField} from './ToggleField';
 
 export const CharacterAdvancement: React.FC<{}> = () => {
    const [tier, setTier] = useCharacterProp('Tier');
@@ -22,8 +27,9 @@ export const CharacterAdvancement: React.FC<{}> = () => {
       useCharacterProp('OtherAdvancement');
 
    return (
-      <View style={styles.vertFlex}>
+      <View style={styles.body}>
          <BigLabelText>Advancement</BigLabelText>
+         <HorizontalBar />
          <View style={styles.horizFlex}>
             <NumericField
                initialValue={tier}
@@ -41,49 +47,75 @@ export const CharacterAdvancement: React.FC<{}> = () => {
                XP
             </NumericField>
          </View>
-         <View style={styles.horizFlex}>
-            <LabelText>Increase Capabilities</LabelText>
-            <ToggleField
-               value={increaseCapabilities}
-               onToggle={setIncreaseCapabilities}
-            />
+         <HorizontalBar />
+         <ToggleSection
+            title="Increase Capabilities"
+            subtext="+4 to stat pools"
+            value={increaseCapabilities}
+            onToggle={setIncreaseCapabilities}
+         />
+         <ToggleSection
+            title="Extra Effort"
+            subtext="+1 to effort"
+            value={extraEffort}
+            onToggle={setExtraEffort}
+         />
+         <ToggleSection
+            title="Move Towards Perfection"
+            subtext="+1 to edge"
+            value={moveTowardsPerfection}
+            onToggle={setMoveTowardsPerfection}
+         />
+         <ToggleSection
+            title="Skill Training"
+            subtext="Train or specialize in a skill"
+            value={skillTraining}
+            onToggle={setSkillTraining}
+         />
+         <ToggleSection
+            title="Other"
+            subtext="Refer to numenera discovery"
+            value={otherAdvancement}
+            onToggle={setOtherAdvancement}
+         />
+      </View>
+   );
+};
+
+interface ToggleSectionProps {
+   title?: string;
+   subtext?: string;
+   value?: boolean;
+   onToggle?: (v: boolean) => void;
+}
+
+const ToggleSection: React.FC<ToggleSectionProps> = (
+   props: ToggleSectionProps,
+) => {
+   return (
+      <View style={styles.tableRow}>
+         <View style={styles.sectCol}>
+            <LabelText style={styles.leftAlign}>
+               {props.title}
+            </LabelText>
+            <SmallLabelText style={styles.leftAlign}>
+               {props.subtext}
+            </SmallLabelText>
          </View>
-         <View style={styles.horizFlex}>
-            <LabelText>Extra Effort</LabelText>
-            <ToggleField
-               value={extraEffort}
-               onToggle={setExtraEffort}
-            />
-         </View>
-         <View style={styles.horizFlex}>
-            <LabelText>Move Towards Perfection</LabelText>
-            <ToggleField
-               value={moveTowardsPerfection}
-               onToggle={setMoveTowardsPerfection}
-            />
-         </View>
-         <View style={styles.horizFlex}>
-            <LabelText>Skill Training</LabelText>
-            <ToggleField
-               value={skillTraining}
-               onToggle={setSkillTraining}
-            />
-         </View>
-         <View style={styles.horizFlex}>
-            <LabelText>Other</LabelText>
-            <ToggleField
-               value={otherAdvancement}
-               onToggle={setOtherAdvancement}
-            />
-         </View>
+         <ToggleField
+            style={styles.rightAlign}
+            value={props.value}
+            onToggle={props.onToggle}
+         />
       </View>
    );
 };
 
 const styles = StyleSheet.create({
-   vertFlex: {
+   body: {
       flexDirection: 'column',
       flexGrow: 1,
+      marginBottom: 10,
    },
    horizFlex: {
       flexDirection: 'row',
@@ -91,14 +123,23 @@ const styles = StyleSheet.create({
       flexShrink: 0,
       justifyContent: 'space-around',
    },
+   tableRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginBottom: 10,
+   },
+   sectCol: {
+      flexDirection: 'column',
+      alignContent: 'flex-start',
+   },
+   leftAlign: {
+      textAlign: 'left',
+      marginLeft: 8,
+   },
    fillInput: {
       flexGrow: 1,
    },
-   rightFixed: {
-      flexBasis: 'auto',
-      flexGrow: 0,
-      flexShrink: 0,
-      alignSelf: 'center',
-      padding: 4,
+   rightAlign: {
+      marginRight: 8,
    },
 });

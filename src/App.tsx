@@ -12,69 +12,126 @@ import React from 'react';
 import {
    SafeAreaView,
    ScrollView,
-   StatusBar,
+   //StatusBar,
    StyleSheet,
-   //useColorScheme,
    View,
 } from 'react-native';
 
-import {Colors} from 'react-native/Libraries/NewAppScreen';
 import {CharacterStats} from './Components/CharacterStats';
-import {DamageTrack} from './Components/DamageTrack';
 import {CharacterProvider} from './CharacterProvider';
 import {CharacterHeader} from './Components/CharacterHeader';
 import {CharacterRecovery} from './Components/CharacterRecovery';
 import {CharacterAdvancement} from './Components/CharacterAdvancement';
+import {ThemeProvider, useTheme} from './Theme';
+import {Section} from './Components/Layout';
+import {LabelText, ParagraphField} from './Components/Text';
+import {useCharacterProp} from './useCharacter';
+import {CharacterSkills} from './Components/CharacterSkills';
 
 export const App: React.FC<{}> = () => {
-   const isDarkMode = true; //useColorScheme() === 'dark';
+   return (
+      <ThemeProvider>
+         <CharacterProvider>
+            <CharacterSheetViewer />
+         </CharacterProvider>
+      </ThemeProvider>
+   );
+};
 
+const CharacterSheetViewer: React.FC<{}> = () => {
+   const theme = useTheme();
    const backgroundStyle = {
-      backgroundColor: isDarkMode
-         ? Colors.darker
-         : Colors.lighter,
+      backgroundColor: theme.lowlight,
    };
 
    const foregroundStyle = {
-      backgroundColor: isDarkMode
-         ? Colors.black
-         : Colors.white,
+      backgroundColor: theme.background,
    };
 
    return (
-      <CharacterProvider>
-         <SafeAreaView style={backgroundStyle}>
-            <StatusBar
-               barStyle={
-                  isDarkMode
-                     ? 'light-content'
-                     : 'dark-content'
-               }
-            />
+      <SafeAreaView
+         style={[backgroundStyle, styles.viewPane]}>
+         {/* <StatusBar
+                  barStyle={
+                     isDarkMode
+                        ? 'light-content'
+                        : 'dark-content'
+                  }
+               /> */}
+         <View style={[styles.floatPane, foregroundStyle]}>
             <ScrollView
                contentInsetAdjustmentBehavior="automatic"
-               style={backgroundStyle}>
-               <View
-                  style={[
-                     styles.viewPane,
-                     foregroundStyle,
-                  ]}>
-                  <CharacterHeader />
-                  <CharacterStats />
-                  <DamageTrack />
-                  <CharacterRecovery />
-                  <CharacterAdvancement />
-               </View>
+               style={[
+                  styles.scrollSpacer,
+                  foregroundStyle,
+               ]}>
+               <CharacterHeader />
+               <CharacterStats />
+               <CharacterRecovery />
+               <CharacterAdvancement />
             </ScrollView>
-         </SafeAreaView>
-      </CharacterProvider>
+         </View>
+         <ScrollView
+            contentInsetAdjustmentBehavior="automatic"
+            style={backgroundStyle}>
+            <CharacterSheetRightPane />
+         </ScrollView>
+      </SafeAreaView>
+   );
+};
+
+const CharacterSheetRightPane: React.FC<{}> = () => {
+   const [background, setBackground] =
+      useCharacterProp('Background');
+   const [notes, setNotes] = useCharacterProp('Notes');
+
+   return (
+      <View>
+         <Section title="Special Abilities" color="magenta">
+            <LabelText>
+               Here we handle the character abilities
+            </LabelText>
+         </Section>
+         <Section title="Cyphers" color="violet">
+            <LabelText>
+               Here we handle the cypher list
+            </LabelText>
+         </Section>
+         <CharacterSkills />
+         <Section title="Equipment" color="cyan">
+            <LabelText>
+               Here we handle the character equipment
+            </LabelText>
+         </Section>
+         <Section title="Attacks" color="green">
+            <LabelText>
+               Here we handle the character attacks
+            </LabelText>
+         </Section>
+         <Section title="Background" color="yellow">
+            <ParagraphField
+               value={background}
+               onChangeText={setBackground}
+            />
+         </Section>
+         <Section title="Notes" color="orange">
+            <ParagraphField
+               value={notes}
+               onChangeText={setNotes}
+            />
+         </Section>
+      </View>
    );
 };
 
 const styles = StyleSheet.create({
    viewPane: {
-      width: '30%',
-      minWidth: 300,
-      maxWidth: 600,
+      flexDirection: 'row',
+   },
+   floatPane: {
+      width: 300,
+   },
+   scrollSpacer: {
+      paddingRight: 10,
    },
 });

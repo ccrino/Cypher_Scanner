@@ -9,27 +9,39 @@ import {
    ViewProps,
    ViewStyle,
 } from 'react-native';
+import {useTheme} from '../Theme';
 
 const styles = StyleSheet.create({
    label: {
       fontFamily: 'Georgia',
       fontSize: 12,
-      color: 'gray',
       textTransform: 'uppercase',
       textAlign: 'center',
    },
    bigLabel: {
       fontFamily: 'Georgia',
       fontSize: 18,
-      color: 'gray',
+      textTransform: 'uppercase',
+      textAlign: 'center',
+   },
+   smallLabel: {
+      fontFamily: 'Georgia',
+      fontSize: 10,
       textTransform: 'uppercase',
       textAlign: 'center',
    },
    textField: {
       fontFamily: 'Georgia',
       fontSize: 12,
-      color: 'white',
       padding: 8,
+   },
+   paragraphField: {
+      fontFamily: 'Georgia',
+      fontSize: 12,
+      padding: 8,
+      margin: 2,
+      borderWidth: 0,
+      minHeight: 80,
    },
 });
 
@@ -40,8 +52,12 @@ interface LabelProps {
 export const LabelText: React.FC<LabelProps> = (
    props: PropsWithChildren<LabelProps>,
 ) => {
+   const theme = useTheme();
+   const color = {
+      color: theme.primary,
+   };
    return (
-      <Text style={[styles.label, props.style]}>
+      <Text style={[styles.label, color, props.style]}>
          {props.children}
       </Text>
    );
@@ -50,8 +66,26 @@ export const LabelText: React.FC<LabelProps> = (
 export const BigLabelText: React.FC<LabelProps> = (
    props: PropsWithChildren<LabelProps>,
 ) => {
+   const theme = useTheme();
+   const color = {
+      color: theme.primary,
+   };
    return (
-      <Text style={[styles.bigLabel, props.style]}>
+      <Text style={[styles.bigLabel, color, props.style]}>
+         {props.children}
+      </Text>
+   );
+};
+
+export const SmallLabelText: React.FC<LabelProps> = (
+   props: PropsWithChildren<LabelProps>,
+) => {
+   const theme = useTheme();
+   const color = {
+      color: theme.primary,
+   };
+   return (
+      <Text style={[styles.smallLabel, color, props.style]}>
          {props.children}
       </Text>
    );
@@ -67,12 +101,48 @@ interface TextFieldProps extends ViewProps {
 export const TextField: React.FC<TextFieldProps> = (
    props: TextFieldProps,
 ) => {
+   const theme = useTheme();
+   const color = {
+      color: theme.highlight,
+      backgroundColor: theme.background,
+   };
+
    return (
       <TextInput
-         style={[styles.textField, props.style]}
+         style={[styles.textField, color, props.style]}
          defaultValue={props.defaultValue}
          multiline={props.multiline}
          onChangeText={props.onChangeText}
       />
    );
 };
+
+interface ParagraphFieldProps {
+   style?: StyleProp<TextProps>;
+   value?: string;
+   onChangeText?: (text: string) => void;
+}
+
+export const ParagraphField: React.FC<ParagraphFieldProps> =
+   (props: ParagraphFieldProps) => {
+      const theme = useTheme();
+      const color = {
+         color: theme.highlight,
+         backgroundColor: theme.background,
+      };
+
+      //const [text, onChangeText] = useState('dummy');
+
+      return (
+         <TextInput
+            style={[
+               styles.paragraphField,
+               color,
+               props.style,
+            ]}
+            multiline
+            defaultValue={props.value}
+            onChangeText={props.onChangeText}
+         />
+      );
+   };

@@ -46,11 +46,11 @@ export default class Character {
    Armor?: number;
 
    //Lists
-   SpecialAbilities?: any[];
-   Cyphers?: string[];
-   Skills?: Skill[];
-   Equipment?: string[];
-   Attacks?: string[];
+   SpecialAbilities?: ListItem[];
+   Cyphers?: ListItem[];
+   Skills: Skill[] = [];
+   Equipment?: ListItem[];
+   Attacks?: ListItem[];
 
    //free-form fields
    Background?: string;
@@ -69,7 +69,11 @@ export default class Character {
    // }
 }
 
-class Skill {
+interface ListItem {
+   id: number;
+}
+
+interface Skill extends ListItem {
    //skill title
    Name?: string;
 

@@ -1,14 +1,16 @@
 import React from 'react';
 import {StyleSheet, View} from 'react-native';
+import {useTheme} from '../Theme';
 import {useCharacterProp} from '../useCharacter';
 import {NumericField} from './NumericField';
 import {BigLabelText} from './Text';
 
 const styles = StyleSheet.create({
+   body: {
+      marginBottom: 40,
+   },
    statBody: {
       flexDirection: 'row',
-      borderWidth: 2,
-      borderColor: 'white',
    },
    edgePool: {
       flexDirection: 'column',
@@ -23,9 +25,7 @@ const styles = StyleSheet.create({
       width: 40,
       minWidth: 40,
       borderWidth: 1,
-      borderColor: 'gray',
       borderRadius: 20,
-      backgroundColor: '#0000',
    },
    largeInput: {
       textAlign: 'center',
@@ -35,27 +35,33 @@ const styles = StyleSheet.create({
       height: 90,
       width: 90,
       borderWidth: 1,
-      borderColor: 'gray',
       borderRadius: 45,
-      backgroundColor: '#0000',
    },
 });
 
-export const CharacterStats: React.FC<{}> = (_props: {}) => {
+export const CharacterStats: React.FC<{}> = () => {
    const [might, setMight] = useCharacterProp('Might');
-   const [mightPool, setMightPool] = useCharacterProp('MightPool');
-   const [mightEdge, setMightEdge] = useCharacterProp('MightEdge');
+   const [mightPool, setMightPool] =
+      useCharacterProp('MightPool');
+   const [mightEdge, setMightEdge] =
+      useCharacterProp('MightEdge');
    const [speed, setSpeed] = useCharacterProp('Speed');
-   const [speedPool, setSpeedPool] = useCharacterProp('SpeedPool');
-   const [speedEdge, setSpeedEdge] = useCharacterProp('SpeedEdge');
-   const [speedCost, setSpeedCost] = useCharacterProp('SpeedCost');
+   const [speedPool, setSpeedPool] =
+      useCharacterProp('SpeedPool');
+   const [speedEdge, setSpeedEdge] =
+      useCharacterProp('SpeedEdge');
+   const [speedCost, setSpeedCost] =
+      useCharacterProp('SpeedCost');
    const [armor, setArmor] = useCharacterProp('Armor');
-   const [intellect, setIntellect] = useCharacterProp('Intellect');
-   const [intellectPool, setIntellectPool] = useCharacterProp('IntellectPool');
-   const [intellectEdge, setIntellectEdge] = useCharacterProp('IntellectEdge');
+   const [intellect, setIntellect] =
+      useCharacterProp('Intellect');
+   const [intellectPool, setIntellectPool] =
+      useCharacterProp('IntellectPool');
+   const [intellectEdge, setIntellectEdge] =
+      useCharacterProp('IntellectEdge');
 
    return (
-      <View>
+      <View style={styles.body}>
          <Stats
             pool={mightPool}
             onPoolChange={setMightPool}
@@ -107,7 +113,15 @@ interface StatsProps {
    onArmorChange?: (val: number) => void;
 }
 
-export const Stats: React.FC<StatsProps> = (props: StatsProps) => {
+export const Stats: React.FC<StatsProps> = (
+   props: StatsProps,
+) => {
+   const theme = useTheme();
+   const color = {
+      borderColor: theme.secondary,
+      backgroundColor: theme.lowlight,
+   };
+
    return (
       <View style={styles.statBody}>
          <View style={styles.edgePool}>
@@ -115,14 +129,14 @@ export const Stats: React.FC<StatsProps> = (props: StatsProps) => {
                initialValue={props.pool ?? 0}
                onNumberChange={props.onPoolChange}
                maxLength={2}
-               style={[styles.smallInput]}>
+               style={[styles.smallInput, color]}>
                Pool
             </NumericField>
             <NumericField
                initialValue={props.edge ?? 0}
                onNumberChange={props.onEdgeChange}
                maxLength={2}
-               style={[styles.smallInput]}>
+               style={[styles.smallInput, color]}>
                Edge
             </NumericField>
          </View>
@@ -131,7 +145,7 @@ export const Stats: React.FC<StatsProps> = (props: StatsProps) => {
                initialValue={props.value ?? 0}
                onNumberChange={props.onStatChange}
                maxLength={2}
-               style={[styles.largeInput]}>
+               style={[styles.largeInput, color]}>
                <BigLabelText>{props.name}</BigLabelText>
             </NumericField>
          </View>
@@ -141,14 +155,14 @@ export const Stats: React.FC<StatsProps> = (props: StatsProps) => {
                   initialValue={props.cost ?? 0}
                   onNumberChange={props.onCostChange}
                   maxLength={2}
-                  style={styles.smallInput}>
+                  style={[styles.smallInput, color]}>
                   Cost
                </NumericField>
                <NumericField
                   initialValue={props.armor ?? 0}
                   onNumberChange={props.onArmorChange}
                   maxLength={2}
-                  style={styles.smallInput}>
+                  style={[styles.smallInput, color]}>
                   Armor
                </NumericField>
             </View>

@@ -1,5 +1,6 @@
 import React from 'react';
 import {StyleSheet, View} from 'react-native';
+import {useTheme} from '../Theme';
 import {useCharacterProp} from '../useCharacter';
 import {TextField, LabelText} from './Text';
 
@@ -10,11 +11,17 @@ export const CharacterHeader: React.FC<{}> = () => {
    const [type, setType] = useCharacterProp('Type');
    const [focus, setFocus] = useCharacterProp('Focus');
 
+   const theme = useTheme();
+   const color = {
+      color: theme.highlight,
+      backgroundColor: theme.lowlight,
+   };
+
    return (
       <View>
          <View style={styles.horizFlex}>
             <TextField
-               style={styles.fill}
+               style={[styles.input, color]}
                defaultValue={name}
                onChangeText={setName}
             />
@@ -22,12 +29,12 @@ export const CharacterHeader: React.FC<{}> = () => {
          </View>
          <View style={styles.horizFlex}>
             <TextField
-               style={styles.fill}
+               style={[styles.input, color]}
                defaultValue={descriptor}
                onChangeText={setDescriptor}
             />
             <TextField
-               style={styles.fill}
+               style={[styles.input, color]}
                defaultValue={type}
                onChangeText={setType}
             />
@@ -35,7 +42,7 @@ export const CharacterHeader: React.FC<{}> = () => {
          <View style={styles.horizFlex}>
             <LabelText style={styles.fixed}>WHO</LabelText>
             <TextField
-               style={styles.fill}
+               style={[styles.input, color]}
                defaultValue={focus}
                onChangeText={setFocus}
             />
@@ -55,8 +62,9 @@ const styles = StyleSheet.create({
       flexShrink: 0,
       justifyContent: 'space-around',
    },
-   fill: {
+   input: {
       flexGrow: 1,
+      borderRadius: 0,
    },
    fixed: {
       flexBasis: 'auto',

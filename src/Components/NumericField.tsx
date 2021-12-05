@@ -7,12 +7,24 @@ import {
    View,
    ViewProps,
 } from 'react-native';
+import {useTheme} from '../Theme';
 import {LabelText} from './Text';
 
 export const NumericField: React.FC<NumericFieldProps> = (
    props: NumericFieldProps,
 ) => {
    const [isInvalid, setInvalid] = useState(false);
+
+   const theme = useTheme();
+   const color = {
+      color: theme.highlight,
+      backgroundColor: theme.lowlight,
+   };
+
+   const error = {
+      borderWidth: 2,
+      borderColor: theme.red,
+   };
 
    function handleTextChange(text: string) {
       const value = Number(text);
@@ -28,9 +40,9 @@ export const NumericField: React.FC<NumericFieldProps> = (
          <TextInput
             style={[
                styles.base,
+               color,
                props.style,
-               isInvalid &&
-                  (props.errorStyle || styles.error),
+               isInvalid && (props.errorStyle || error),
             ]}
             defaultValue={props.initialValue?.toString()}
             maxLength={props.maxLength}
@@ -47,10 +59,6 @@ export const NumericField: React.FC<NumericFieldProps> = (
 const styles = StyleSheet.create({
    base: {
       fontFamily: 'Georgia',
-   },
-   error: {
-      borderWidth: 2,
-      borderColor: 'red',
    },
    col: {
       flexDirection: 'column',

@@ -12,7 +12,7 @@ export function useCharacter() {
 
 export function useCharacterProp<K extends keyof Character>(
    key: K,
-): [Character[K], (value: Character[K]) => void] {
+): [Character[K], Dispatch<SetStateAction<Character[K]>>] {
    const val = useContextSelector(
       CharacterContext,
       v => v[0]?.[key],
@@ -25,8 +25,20 @@ export function useCharacterProp<K extends keyof Character>(
 
    return [
       val,
-      (newVal: Character[K]) =>
+      (
+         action:
+            | Character[K]
+            | ((prevState: Character[K]) => Character[K]),
+      ) =>
          setState(s => {
+            const oldVal = s[key];
+            const newVal =
+               typeof action === 'function'
+                  ? action(oldVal)
+                  : action;
+            if (oldVal === newVal) {
+               return s;
+            }
             return {...s, [key]: newVal};
          }),
    ];

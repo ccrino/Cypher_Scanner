@@ -23,6 +23,23 @@ const testCharacter: Character = new Character({
    Impaired: true,
    Debilitated: true,
    Dead: true,
+
+   Skills: [
+      {
+         id: 0,
+         name: 'climbing',
+         inability: false,
+         trained: true,
+         specialized: false,
+      },
+      {
+         id: 1,
+         name: 'understanding numenera',
+         inability: true,
+         trained: false,
+         specialized: false,
+      },
+   ],
 });
 
 export const CharacterProvider: React.FC<

@@ -1,7 +1,15 @@
 import React from 'react';
-import {StyleSheet, View} from 'react-native';
+import {
+   ColorValue,
+   StyleProp,
+   StyleSheet,
+   View,
+   ViewStyle,
+} from 'react-native';
+import {useTheme} from '../Theme';
 import {useCharacterProp} from '../useCharacter';
-import ToggleField from './ToggleField';
+import {LabelText} from './Text';
+import {ToggleField} from './ToggleField';
 
 interface DamageTrackProps {}
 
@@ -14,58 +22,89 @@ export const DamageTrack: React.FC<DamageTrackProps> = (
    const [Impaired, setImpaired] =
       useCharacterProp('Impaired');
 
-   const DeadColor = {
-      flexGrow: 1,
-      backgroundColor: Dead
-         ? 'red'
-         : Debilitated
-         ? 'orange'
-         : Impaired
-         ? 'yellow'
-         : '#0000',
-   };
-   const DebiliatedColor = {
-      flexGrow: 1,
-      backgroundColor: Debilitated
-         ? 'orange'
-         : Impaired
-         ? 'yellow'
-         : '#0000',
-   };
-   const ImpairedColor = {
-      flexGrow: 1,
-      backgroundColor: Impaired ? 'yellow' : '#0000',
-   };
+   const theme = useTheme();
+   return (
+      <ToggleTrack
+         data={[
+            {
+               color: theme.yellow,
+               title: 'Impaired',
+               value: Impaired,
+               onToggle: setImpaired,
+            },
+            {
+               color: theme.orange,
+               title: 'Debilitated',
+               value: Debilitated,
+               onToggle: setDebilitated,
+            },
+            {
+               color: theme.red,
+               title: 'Dead',
+               value: Dead,
+               onToggle: setDead,
+            },
+         ]}
+      />
+   );
+};
+
+interface TrackProps {
+   color: ColorValue;
+   title?: string;
+   value?: boolean;
+   onToggle?: (v: boolean) => void;
+}
+
+interface ToggleTrackProps {
+   data: TrackProps[];
+   style?: StyleProp<ViewStyle>;
+}
+
+export const ToggleTrack: React.FC<ToggleTrackProps> = (
+   props: ToggleTrackProps,
+) => {
+   const theme = useTheme();
 
    return (
-      <View style={styles.track}>
-         <View style={DeadColor}>
-            <ToggleField
-               thumbColor={'white'}
-               trackColor={{false: '#0000', true: 'red'}}
-               value={Dead}
-               onToggle={setDead}>
-               Dead
-            </ToggleField>
-         </View>
-         <View style={DebiliatedColor}>
-            <ToggleField
-               thumbColor={'white'}
-               trackColor={{false: '#0000', true: 'orange'}}
-               value={Debilitated}
-               onToggle={setDebilitated}>
-               Debilitated
-            </ToggleField>
-         </View>
-         <View style={ImpairedColor}>
-            <ToggleField
-               thumbColor={'white'}
-               trackColor={{false: '#0000', true: 'yellow'}}
-               value={Impaired}
-               onToggle={setImpaired}>
-               Impaired
-            </ToggleField>
-         </View>
+      <View style={[styles.track, props.style]}>
+         {props.data.map(
+            (
+               item: TrackProps,
+               i: number,
+               data: TrackProps[],
+            ) => {
+               const color = {
+                  backgroundColor: item.value
+                     ? item.color
+                     : theme.background,
+                  borderColor: theme.background,
+               };
+
+               return (
+                  <View
+                     key={i}
+                     style={[
+                        styles.col,
+                        {zIndex: data.length - i},
+                     ]}>
+                     <View
+                        style={[color, styles.round]}
+                        onTouchEnd={() => {
+                           item.onToggle?.(!item.value);
+                        }}>
+                        <ToggleField
+                           style={styles.narrowToggle}
+                           trackOnColor={item.color}
+                           value={item.value}
+                           onToggle={item.onToggle}
+                        />
+                     </View>
+                     <LabelText>{item.title}</LabelText>
+                  </View>
+               );
+            },
+         )}
       </View>
    );
 };
@@ -73,7 +112,29 @@ export const DamageTrack: React.FC<DamageTrackProps> = (
 const styles = StyleSheet.create({
    track: {
       flexDirection: 'row',
-      justifyContent: 'space-around',
+      justifyContent: 'space-evenly',
+      marginHorizontal: 0,
+      flexGrow: 1,
    },
-   toggle: {},
+   narrowToggle: {
+      //marginTop: -10,
+   },
+   round: {
+      minHeight: 24,
+      height: 24,
+      maxHeight: 24,
+      borderTopRightRadius: 12,
+      borderBottomRightRadius: 12,
+      marginLeft: -10,
+      borderRightWidth: 4,
+      borderBottomWidth: 2,
+      borderTopWidth: 2,
+      flexGrow: 1,
+   },
+   col: {
+      flexDirection: 'column',
+      flexGrow: 1,
+      margin: 0,
+      padding: 0,
+   },
 });
