@@ -4,27 +4,25 @@ import {
    TouchableOpacity,
    View,
 } from 'react-native';
-import {BoxToggle} from './Inputs';
+import {DiamondToggle} from './Inputs';
 import {Section} from './Layout';
 import {BigLabelText, LabelText, TextField} from './Text';
 import {
    DraggableList,
    DragHandle,
-   RemovePress,
+   RemoveHandle,
 } from './Draggable';
 import {useTheme} from '../Theme';
 import {useCharacterProp} from '../useCharacter';
+import {Skill} from '../Character';
 
 export const CharacterSkills: React.FC<{}> = () => {
    const [skillData, setSkillData] =
-      useCharacterProp('Skills');
+      useCharacterProp('skills');
    let nextId = 0;
 
-   const setSkillItem = (
-      id: number,
-      skill: SkillListItemProps,
-   ) => {
-      setSkillData((s: SkillListItem[]) => {
+   const setSkillItem = (id: number, skill: Skill) => {
+      setSkillData((s: Skill[]) => {
          const newSkillData = s.slice();
          newSkillData[s.findIndex(i => i.id === id)] =
             skill;
@@ -32,7 +30,7 @@ export const CharacterSkills: React.FC<{}> = () => {
       });
    };
 
-   const renderChild = (item: SkillListItem) => {
+   const renderChild = (item: Skill) => {
       nextId = Math.max(nextId, item.id);
       return (
          <SkillListItem {...item} onChange={setSkillItem} />
@@ -79,25 +77,14 @@ export const CharacterSkills: React.FC<{}> = () => {
    );
 };
 
-interface SkillListItem {
-   id: number;
-   name?: string;
-   inability?: boolean;
-   trained?: boolean;
-   specialized?: boolean;
-}
-
-interface SkillListItemProps extends SkillListItem {
-   onChange?: (id: number, skill: SkillListItem) => void;
+interface SkillListItemProps extends Skill {
+   onChange?: (id: number, skill: Skill) => void;
 }
 
 const SkillListItem: React.FC<SkillListItemProps> = (
    props: SkillListItemProps,
 ) => {
-   const sendUpdate = <
-      T extends SkillListItem,
-      K extends keyof T,
-   >(
+   const sendUpdate = <T extends Skill, K extends keyof T>(
       key: K,
       val: T[K],
    ) => {
@@ -123,25 +110,25 @@ const SkillListItem: React.FC<SkillListItemProps> = (
                sendUpdate('name', text);
             }}
          />
-         <BoxToggle
+         <DiamondToggle
             value={props.inability}
             onValueChange={(val: boolean) =>
                sendUpdate('inability', val)
             }
          />
-         <BoxToggle
+         <DiamondToggle
             value={props.trained}
             onValueChange={(val: boolean) =>
                sendUpdate('trained', val)
             }
          />
-         <BoxToggle
+         <DiamondToggle
             value={props.specialized}
             onValueChange={(val: boolean) =>
                sendUpdate('specialized', val)
             }
          />
-         <RemovePress id={props.id} />
+         <RemoveHandle id={props.id} />
       </View>
    );
 };

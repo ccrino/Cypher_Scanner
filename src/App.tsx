@@ -27,6 +27,9 @@ import {Section} from './Components/Layout';
 import {LabelText, ParagraphField} from './Components/Text';
 import {useCharacterProp} from './useCharacter';
 import {CharacterSkills} from './Components/CharacterSkills';
+import {SpecialAbilities} from './Components/SpecialAbilities';
+import {Cyphers} from './Components/Cyphers';
+import {EquipmentList} from './Components/Equipment';
 
 export const App: React.FC<{}> = () => {
    return (
@@ -82,27 +85,15 @@ const CharacterSheetViewer: React.FC<{}> = () => {
 
 const CharacterSheetRightPane: React.FC<{}> = () => {
    const [background, setBackground] =
-      useCharacterProp('Background');
-   const [notes, setNotes] = useCharacterProp('Notes');
+      useCharacterProp('background');
+   const [notes, setNotes] = useCharacterProp('notes');
 
    return (
       <View>
-         <Section title="Special Abilities" color="magenta">
-            <LabelText>
-               Here we handle the character abilities
-            </LabelText>
-         </Section>
-         <Section title="Cyphers" color="violet">
-            <LabelText>
-               Here we handle the cypher list
-            </LabelText>
-         </Section>
+         <SpecialAbilities />
+         <Cyphers />
          <CharacterSkills />
-         <Section title="Equipment" color="cyan">
-            <LabelText>
-               Here we handle the character equipment
-            </LabelText>
-         </Section>
+         <EquipmentList />
          <Section title="Attacks" color="green">
             <LabelText>
                Here we handle the character attacks

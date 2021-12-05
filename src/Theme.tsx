@@ -7,6 +7,7 @@ import React, {
 } from 'react';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import {useColorScheme} from 'react-native';
+import {KeysOfExcept} from './types';
 
 interface AbstractTheme {
    base03: string;
@@ -66,15 +67,20 @@ interface Theme {
    green: string;
 }
 
-export type AccentColor =
-   | 'yellow'
-   | 'orange'
-   | 'red'
-   | 'magenta'
-   | 'violet'
-   | 'blue'
-   | 'cyan'
-   | 'green';
+export type AccentColor = KeysOfExcept<
+   Theme,
+   `${string}${'y' | 'ht' | 'd'}`
+>;
+
+// export type AccentColor =
+//    | 'yellow'
+//    | 'orange'
+//    | 'red'
+//    | 'magenta'
+//    | 'violet'
+//    | 'blue'
+//    | 'cyan'
+//    | 'green';
 
 const defaultTheme: Theme = {
    primary: 'black',

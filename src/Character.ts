@@ -1,84 +1,119 @@
+import {ConstructableObjectOf} from './types';
+
 export default class Character {
    //Overview fields
-   Name?: string;
-   Descriptor?: string;
-   Type?: string;
-   Focus?: string;
+   name?: string;
+   descriptor?: string;
+   type?: string;
+   focus?: string;
 
    //Core Stats
-   Might?: number;
-   MightPool?: number;
-   MightEdge?: number;
-   Speed?: number;
-   SpeedPool?: number;
-   SpeedEdge?: number;
-   SpeedCost?: number;
-   Intellect?: number;
-   IntellectPool?: number;
-   IntellectEdge?: number;
+   might?: number;
+   mightPool?: number;
+   mightEdge?: number;
+   speed?: number;
+   speedPool?: number;
+   speedEdge?: number;
+   speedCost?: number;
+   intellect?: number;
+   intellectPool?: number;
+   intellectEdge?: number;
 
    //Tier fields
-   Tier?: number;
-   Effort?: number;
-   XP?: number;
+   tier?: number;
+   effort?: number;
+   xp?: number;
 
    //Advancement markers
-   ExtraEffort?: boolean;
-   SkillTraining?: boolean;
-   OtherAdvancement?: boolean;
-   MoveTowardPerfection?: boolean;
-   IncreaseCapabilities?: boolean;
+   extraEffort?: boolean;
+   skillTraining?: boolean;
+   otherAdvancement?: boolean;
+   moveTowardPerfection?: boolean;
+   increaseCapabilities?: boolean;
 
    //Recovery markers
-   RecoveryMod?: number;
-   RecoveryAction?: boolean;
-   RecoveryMinute?: boolean;
-   RecoveryHour?: boolean;
-   RecoveryTenHour?: boolean;
+   recoveryMod?: number;
+   recoveryAction?: boolean;
+   recoveryMinute?: boolean;
+   recoveryHour?: boolean;
+   recoveryTenHour?: boolean;
 
    //Damage track
-   Debilitated?: boolean;
-   Impaired?: boolean;
-   Dead?: boolean;
+   debilitated?: boolean;
+   impaired?: boolean;
+   dead?: boolean;
 
    //Other core or tier related fields
-   CypherLimit?: number;
-   Armor?: number;
+   cypherLimit?: number;
+   shins?: number;
+   armor?: number;
 
    //Lists
-   SpecialAbilities?: ListItem[];
-   Cyphers?: ListItem[];
-   Skills: Skill[] = [];
-   Equipment?: ListItem[];
-   Attacks?: ListItem[];
+   specialAbilities: SpecialAbility[] = [];
+   cyphers: Cypher[] = [];
+   skills: Skill[] = [];
+   equipment: Equipment[] = [];
+   attacks: Attack[] = [];
 
    //free-form fields
-   Background?: string;
-   Notes?: string;
+   background?: string;
+   notes?: string;
 
-   constructor(o: Object = {}) {
+   constructor(o: ConstructableObjectOf<Character> = {}) {
       Object.assign(this, o);
    }
-
-   // public static toJSON(character: Character): string {
-   //    return JSON.stringify(character);
-   // }
-
-   // public static fromJSON(json: string): Character {
-   //    return JSON.parse(json) as Character;
-   // }
 }
+
+type StatType = 'might' | 'speed' | 'intellect';
 
 interface ListItem {
    id: number;
 }
 
-interface Skill extends ListItem {
-   //skill title
-   Name?: string;
+export interface SpecialAbility extends ListItem {
+   name?: string;
+   enabler?: boolean;
+   hasCost?: boolean;
+   costPool?: StatType;
+   cost?: number;
+   costPlus?: boolean;
+   description?: string;
+}
 
+export interface Cypher extends ListItem {
+   name?: string;
+   level?: number;
+   form?: 'internal' | 'wearable' | 'useable';
+   description?: string;
+}
+
+export interface Skill extends ListItem {
+   //skill title
+   name?: string;
    //Skill training markers
-   Inability?: boolean;
-   Trained?: boolean;
-   Specialized?: boolean;
+   inability?: boolean;
+   trained?: boolean;
+   specialized?: boolean;
+}
+
+export interface Equipment extends ListItem {
+   name?: string;
+   count?: number;
+   description?: string;
+}
+
+export interface Attack extends ListItem {
+   name?: string;
+   damage?: number;
+   damageType?: StatType;
+   ignoresArmor?: boolean;
+   description?: string;
+   links: LinkType[];
+}
+
+type LinkSource = 'item' | 'ability' | 'skill';
+
+export interface LinkType extends ListItem {
+   linkSource?: LinkSource;
+   linkId?: number;
 }

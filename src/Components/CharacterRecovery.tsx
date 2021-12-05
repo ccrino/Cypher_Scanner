@@ -3,26 +3,23 @@ import {StyleSheet, View} from 'react-native';
 import {useTheme} from '../Theme';
 import {useCharacterProp} from '../useCharacter';
 import {DamageTrack, ToggleTrack} from './DamageTrack';
+import {SmallOrbNumberInput} from './Inputs';
 import {HorizontalBar} from './Layout';
-import {NumericField} from './NumericField';
-import {BigLabelText} from './Text';
+import {BigLabelText, LabelText} from './Text';
 
 export const CharacterRecovery: React.FC<{}> = () => {
    const [recoveryMod, setRecoveryMod] =
-      useCharacterProp('RecoveryMod');
+      useCharacterProp('recoveryMod');
    const [recoveryAction, setRecoveryAction] =
-      useCharacterProp('RecoveryAction');
+      useCharacterProp('recoveryAction');
    const [recoveryMinute, setRecoveryMinute] =
-      useCharacterProp('RecoveryMinute');
+      useCharacterProp('recoveryMinute');
    const [recoveryHour, setRecoveryHour] =
-      useCharacterProp('RecoveryHour');
+      useCharacterProp('recoveryHour');
    const [recoveryTenHour, setRecoveryTenHour] =
-      useCharacterProp('RecoveryTenHour');
+      useCharacterProp('recoveryTenHour');
 
    const theme = useTheme();
-   const color = {
-      borderColor: theme.secondary,
-   };
 
    return (
       <View style={styles.body}>
@@ -30,12 +27,11 @@ export const CharacterRecovery: React.FC<{}> = () => {
          <HorizontalBar />
          <View style={styles.horizFlex}>
             <View style={styles.fieldBack}>
-               <NumericField
-                  style={[styles.smallInput, color]}
+               <SmallOrbNumberInput
                   initialValue={recoveryMod}
                   onNumberChange={setRecoveryMod}>
-                  1d6+
-               </NumericField>
+                  <LabelText>1d6+</LabelText>
+               </SmallOrbNumberInput>
             </View>
             <ToggleTrack
                style={styles.trackBack}

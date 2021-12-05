@@ -29,7 +29,6 @@ const styles = StyleSheet.create({
       width: 40,
       height: 20,
       borderRadius: 10,
-      //borderWidth: 1,
    },
    switchInt: {
       padding: -1,

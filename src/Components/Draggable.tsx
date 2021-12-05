@@ -70,7 +70,10 @@ type DataType = ItemType[];
 interface DraggableListProps {
    data: DataType;
    setData: Dispatch<SetStateAction<DataType>>;
-   renderChild: (item: ItemType) => React.ReactElement;
+   renderChild: (
+      item: ItemType,
+      ind: number,
+   ) => React.ReactElement;
 }
 
 /**
@@ -213,7 +216,7 @@ export const DraggableList: React.FC<DraggableListProps> = (
                         });
                      }}
                      style={computedStyle}>
-                     {props.renderChild(item)}
+                     {props.renderChild(item, ind)}
                   </View>
                );
             }}
@@ -272,7 +275,7 @@ export const DragHandle: React.FC<ItemType> = (
    );
 };
 
-export const RemovePress: React.FC<ItemType> = (
+export const RemoveHandle: React.FC<ItemType> = (
    props: ItemType,
 ) => {
    const removeHandler = useContext(DraggableContext)[3];

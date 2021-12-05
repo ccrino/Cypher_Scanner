@@ -1,9 +1,11 @@
 import React from 'react';
 import {StyleSheet, View} from 'react-native';
-import {useTheme} from '../Theme';
 import {useCharacterProp} from '../useCharacter';
-import {NumericField} from './NumericField';
-import {BigLabelText} from './Text';
+import {
+   LargeOrbNumberInput,
+   SmallOrbNumberInput,
+} from './Inputs';
+import {BigLabelText, LabelText} from './Text';
 
 const styles = StyleSheet.create({
    body: {
@@ -16,49 +18,28 @@ const styles = StyleSheet.create({
       flexDirection: 'column',
       alignSelf: 'flex-end',
    },
-   smallInput: {
-      textAlign: 'center',
-      margin: 5,
-      fontSize: 20,
-      paddingTop: 5,
-      height: 40,
-      width: 40,
-      minWidth: 40,
-      borderWidth: 1,
-      borderRadius: 20,
-   },
-   largeInput: {
-      textAlign: 'center',
-      padding: 15,
-      margin: 5,
-      fontSize: 40,
-      height: 90,
-      width: 90,
-      borderWidth: 1,
-      borderRadius: 45,
-   },
 });
 
 export const CharacterStats: React.FC<{}> = () => {
-   const [might, setMight] = useCharacterProp('Might');
+   const [might, setMight] = useCharacterProp('might');
    const [mightPool, setMightPool] =
-      useCharacterProp('MightPool');
+      useCharacterProp('mightPool');
    const [mightEdge, setMightEdge] =
-      useCharacterProp('MightEdge');
-   const [speed, setSpeed] = useCharacterProp('Speed');
+      useCharacterProp('mightEdge');
+   const [speed, setSpeed] = useCharacterProp('speed');
    const [speedPool, setSpeedPool] =
-      useCharacterProp('SpeedPool');
+      useCharacterProp('speedPool');
    const [speedEdge, setSpeedEdge] =
-      useCharacterProp('SpeedEdge');
+      useCharacterProp('speedEdge');
    const [speedCost, setSpeedCost] =
-      useCharacterProp('SpeedCost');
-   const [armor, setArmor] = useCharacterProp('Armor');
+      useCharacterProp('speedCost');
+   const [armor, setArmor] = useCharacterProp('armor');
    const [intellect, setIntellect] =
-      useCharacterProp('Intellect');
+      useCharacterProp('intellect');
    const [intellectPool, setIntellectPool] =
-      useCharacterProp('IntellectPool');
+      useCharacterProp('intellectPool');
    const [intellectEdge, setIntellectEdge] =
-      useCharacterProp('IntellectEdge');
+      useCharacterProp('intellectEdge');
 
    return (
       <View style={styles.body}>
@@ -116,55 +97,39 @@ interface StatsProps {
 export const Stats: React.FC<StatsProps> = (
    props: StatsProps,
 ) => {
-   const theme = useTheme();
-   const color = {
-      borderColor: theme.secondary,
-      backgroundColor: theme.lowlight,
-   };
-
    return (
       <View style={styles.statBody}>
          <View style={styles.edgePool}>
-            <NumericField
+            <SmallOrbNumberInput
                initialValue={props.pool ?? 0}
-               onNumberChange={props.onPoolChange}
-               maxLength={2}
-               style={[styles.smallInput, color]}>
-               Pool
-            </NumericField>
-            <NumericField
+               onNumberChange={props.onPoolChange}>
+               <LabelText>Pool</LabelText>
+            </SmallOrbNumberInput>
+            <SmallOrbNumberInput
                initialValue={props.edge ?? 0}
-               onNumberChange={props.onEdgeChange}
-               maxLength={2}
-               style={[styles.smallInput, color]}>
-               Edge
-            </NumericField>
+               onNumberChange={props.onEdgeChange}>
+               <LabelText>Edge</LabelText>
+            </SmallOrbNumberInput>
          </View>
          <View style={styles.edgePool}>
-            <NumericField
+            <LargeOrbNumberInput
                initialValue={props.value ?? 0}
-               onNumberChange={props.onStatChange}
-               maxLength={2}
-               style={[styles.largeInput, color]}>
+               onNumberChange={props.onStatChange}>
                <BigLabelText>{props.name}</BigLabelText>
-            </NumericField>
+            </LargeOrbNumberInput>
          </View>
          {props.showCost && (
             <View style={styles.edgePool}>
-               <NumericField
+               <SmallOrbNumberInput
                   initialValue={props.cost ?? 0}
-                  onNumberChange={props.onCostChange}
-                  maxLength={2}
-                  style={[styles.smallInput, color]}>
-                  Cost
-               </NumericField>
-               <NumericField
+                  onNumberChange={props.onCostChange}>
+                  <LabelText>Cost</LabelText>
+               </SmallOrbNumberInput>
+               <SmallOrbNumberInput
                   initialValue={props.armor ?? 0}
-                  onNumberChange={props.onArmorChange}
-                  maxLength={2}
-                  style={[styles.smallInput, color]}>
-                  Armor
-               </NumericField>
+                  onNumberChange={props.onArmorChange}>
+                  <LabelText>Armor</LabelText>
+               </SmallOrbNumberInput>
             </View>
          )}
       </View>

@@ -1,8 +1,8 @@
 import React from 'react';
 import {StyleSheet, View} from 'react-native';
 import {useCharacterProp} from '../useCharacter';
+import {NumericBaseInput} from './Inputs';
 import {HorizontalBar} from './Layout';
-import {NumericField} from './NumericField';
 import {
    BigLabelText,
    LabelText,
@@ -11,41 +11,41 @@ import {
 import {ToggleField} from './ToggleField';
 
 export const CharacterAdvancement: React.FC<{}> = () => {
-   const [tier, setTier] = useCharacterProp('Tier');
-   const [effort, setEffort] = useCharacterProp('Effort');
-   const [xp, setXP] = useCharacterProp('XP');
+   const [tier, setTier] = useCharacterProp('tier');
+   const [effort, setEffort] = useCharacterProp('effort');
+   const [xp, setXP] = useCharacterProp('xp');
 
    const [increaseCapabilities, setIncreaseCapabilities] =
-      useCharacterProp('IncreaseCapabilities');
+      useCharacterProp('increaseCapabilities');
    const [extraEffort, setExtraEffort] =
-      useCharacterProp('ExtraEffort');
+      useCharacterProp('extraEffort');
    const [moveTowardsPerfection, setMoveTowardsPerfection] =
-      useCharacterProp('MoveTowardPerfection');
+      useCharacterProp('moveTowardPerfection');
    const [skillTraining, setSkillTraining] =
-      useCharacterProp('SkillTraining');
+      useCharacterProp('skillTraining');
    const [otherAdvancement, setOtherAdvancement] =
-      useCharacterProp('OtherAdvancement');
+      useCharacterProp('otherAdvancement');
 
    return (
       <View style={styles.body}>
          <BigLabelText>Advancement</BigLabelText>
          <HorizontalBar />
          <View style={styles.horizFlex}>
-            <NumericField
+            <NumericBaseInput
                initialValue={tier}
                onNumberChange={setTier}>
                Tier
-            </NumericField>
-            <NumericField
+            </NumericBaseInput>
+            <NumericBaseInput
                initialValue={effort}
                onNumberChange={setEffort}>
                Effort
-            </NumericField>
-            <NumericField
+            </NumericBaseInput>
+            <NumericBaseInput
                initialValue={xp}
                onNumberChange={setXP}>
                XP
-            </NumericField>
+            </NumericBaseInput>
          </View>
          <HorizontalBar />
          <ToggleSection

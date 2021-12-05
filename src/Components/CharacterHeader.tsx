@@ -5,11 +5,11 @@ import {useCharacterProp} from '../useCharacter';
 import {TextField, LabelText} from './Text';
 
 export const CharacterHeader: React.FC<{}> = () => {
-   const [name, setName] = useCharacterProp('Name');
+   const [name, setName] = useCharacterProp('name');
    const [descriptor, setDescriptor] =
-      useCharacterProp('Descriptor');
-   const [type, setType] = useCharacterProp('Type');
-   const [focus, setFocus] = useCharacterProp('Focus');
+      useCharacterProp('descriptor');
+   const [type, setType] = useCharacterProp('type');
+   const [focus, setFocus] = useCharacterProp('focus');
 
    const theme = useTheme();
    const color = {

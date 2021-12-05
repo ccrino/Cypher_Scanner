@@ -118,7 +118,7 @@ export const TextField: React.FC<TextFieldProps> = (
 };
 
 interface ParagraphFieldProps {
-   style?: StyleProp<TextProps>;
+   style?: StyleProp<TextStyle | ViewStyle>;
    value?: string;
    onChangeText?: (text: string) => void;
 }

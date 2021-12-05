@@ -16,11 +16,11 @@ interface DamageTrackProps {}
 export const DamageTrack: React.FC<DamageTrackProps> = (
    _props: DamageTrackProps,
 ) => {
-   const [Dead, setDead] = useCharacterProp('Dead');
+   const [Dead, setDead] = useCharacterProp('dead');
    const [Debilitated, setDebilitated] =
-      useCharacterProp('Debilitated');
+      useCharacterProp('debilitated');
    const [Impaired, setImpaired] =
-      useCharacterProp('Impaired');
+      useCharacterProp('impaired');
 
    const theme = useTheme();
    return (
