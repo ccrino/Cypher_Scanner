@@ -4,16 +4,22 @@ import React, {
    SetStateAction,
    useMemo,
 } from 'react';
+import {OnListSubChange} from './types';
 
 type ItemType = {
    id: number;
 };
 
+/**
+ * creates a state change method which will update a single list item property to a provided value
+ * @param setData a state change method for the complete list
+ */
 export function makeListSubChangeHandler<
    T extends ItemType,
-   K extends keyof T,
->(setData: Dispatch<SetStateAction<T[]>>) {
-   return (id: number, key: K, value: T[K]) =>
+>(
+   setData: Dispatch<SetStateAction<T[]>>,
+): OnListSubChange<T> {
+   return (id, key, value) =>
       setData((s: T[]) => {
          const ind = s.findIndex(i => i.id === id);
          const newData = s.slice();
