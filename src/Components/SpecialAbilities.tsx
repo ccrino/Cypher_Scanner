@@ -4,7 +4,7 @@ import {
    TouchableOpacity,
    View,
 } from 'react-native';
-import {SpecialAbility} from '../Character';
+import {SpecialAbility, StatType} from '../Character';
 import {useTheme} from '../Theme';
 import {useCharacterProp} from '../useCharacter';
 import {
@@ -129,7 +129,17 @@ interface AbilityItemProps extends SpecialAbility {
    onChange: (id: number, item: SpecialAbility) => void;
 }
 
-const AbilityItem: React.FC<AbilityItemProps> = (
+type CostPoolOption = {
+   value: StatType;
+};
+
+const costPoolOptions: CostPoolOption[] = [
+   {value: 'might'},
+   {value: 'speed'},
+   {value: 'intellect'},
+];
+
+export const AbilityItem: React.FC<AbilityItemProps> = (
    props: AbilityItemProps,
 ) => {
    const [isExpanded, setIsExpanded] = useState(false);
@@ -164,14 +174,6 @@ const AbilityItem: React.FC<AbilityItemProps> = (
             : '') + (props.enabler ? 'e.' : '')
       );
    };
-
-   const costPoolOptions: {
-      value: 'might' | 'speed' | 'intellect';
-   }[] = [
-      {value: 'might'},
-      {value: 'speed'},
-      {value: 'intellect'},
-   ];
 
    return (
       <View style={[backdrop]}>
@@ -230,6 +232,9 @@ const AbilityItem: React.FC<AbilityItemProps> = (
                            }}
                            style={styles.pickerField}
                            options={costPoolOptions}
+                           toDisplayValue={opt =>
+                              (opt as CostPoolOption).value
+                           }
                         />
                      </>
                   )}

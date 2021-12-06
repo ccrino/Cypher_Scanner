@@ -24,12 +24,25 @@ import {CharacterRecovery} from './Components/CharacterRecovery';
 import {CharacterAdvancement} from './Components/CharacterAdvancement';
 import {ThemeProvider, useTheme} from './Theme';
 import {Section} from './Components/Layout';
-import {LabelText, ParagraphField} from './Components/Text';
+import {ParagraphField} from './Components/Text';
 import {useCharacterProp} from './useCharacter';
-import {CharacterSkills} from './Components/CharacterSkills';
+import {CharacterSkills} from './Components/Skills';
 import {SpecialAbilities} from './Components/SpecialAbilities';
 import {Cyphers} from './Components/Cyphers';
 import {EquipmentList} from './Components/Equipment';
+import {AttacksList} from './Components/Attacks';
+
+const styles = StyleSheet.create({
+   viewPane: {
+      flexDirection: 'row',
+   },
+   floatPane: {
+      width: 300,
+   },
+   scrollSpacer: {
+      paddingRight: 10,
+   },
+});
 
 export const App: React.FC<{}> = () => {
    return (
@@ -94,11 +107,7 @@ const CharacterSheetRightPane: React.FC<{}> = () => {
          <Cyphers />
          <CharacterSkills />
          <EquipmentList />
-         <Section title="Attacks" color="green">
-            <LabelText>
-               Here we handle the character attacks
-            </LabelText>
-         </Section>
+         <AttacksList />
          <Section title="Background" color="yellow">
             <ParagraphField
                value={background}
@@ -114,15 +123,3 @@ const CharacterSheetRightPane: React.FC<{}> = () => {
       </View>
    );
 };
-
-const styles = StyleSheet.create({
-   viewPane: {
-      flexDirection: 'row',
-   },
-   floatPane: {
-      width: 300,
-   },
-   scrollSpacer: {
-      paddingRight: 10,
-   },
-});

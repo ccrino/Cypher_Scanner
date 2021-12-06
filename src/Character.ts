@@ -64,7 +64,7 @@ export default class Character {
    }
 }
 
-type StatType = 'might' | 'speed' | 'intellect';
+export type StatType = 'might' | 'speed' | 'intellect';
 
 interface ListItem {
    id: number;
@@ -108,10 +108,10 @@ export interface Attack extends ListItem {
    damageType?: StatType;
    ignoresArmor?: boolean;
    description?: string;
-   links: LinkType[];
+   links?: LinkType[];
 }
 
-type LinkSource = 'item' | 'ability' | 'skill';
+export type LinkSource = 'item' | 'ability' | 'skill';
 
 export interface LinkType extends ListItem {
    linkSource?: LinkSource;

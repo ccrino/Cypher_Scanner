@@ -82,7 +82,7 @@ export const EquipmentList: React.FC<{}> = () => {
    const renderChild = (item: Equipment) => {
       nextId = Math.max(nextId, item.id);
       return (
-         <CypherItem
+         <EquipmentItem
             {...item}
             onChange={setEquipmentItem}
          />
@@ -129,7 +129,7 @@ interface EquipmentItemProps extends Equipment {
    onChange: OnListChange<Equipment>;
 }
 
-const CypherItem: React.FC<EquipmentItemProps> = (
+export const EquipmentItem: React.FC<EquipmentItemProps> = (
    props: EquipmentItemProps,
 ) => {
    const [isExpanded, setIsExpanded] = useState(false);

@@ -43,3 +43,12 @@ export function useCharacterProp<K extends keyof Character>(
          }),
    ];
 }
+
+export type CharacterContext = [
+   Character | undefined,
+   Dispatch<SetStateAction<Character>> | undefined,
+];
+
+export function useCharacterBySelector(selector: any) {
+   return useContextSelector(CharacterContext, selector);
+}

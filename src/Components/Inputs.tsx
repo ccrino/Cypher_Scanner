@@ -178,15 +178,13 @@ export const ExpandToggle: React.FC<ToggleProps> = (
    );
 };
 
-interface PickerOption {
-   value: string;
-   label?: string;
-}
+type PickerOption = object;
 
 interface PickerProps {
    selectedValue?: string;
    onValueChange?: OnChange<number>;
    options: PickerOption[];
+   toDisplayValue: (opt: PickerOption) => string;
    style?: StyleProp<ViewStyle>;
 }
 
@@ -222,7 +220,7 @@ export const Picker: React.FC<PickerProps> = (
                      }}>
                      <LabelText
                         style={styles.pickerItemLabel}>
-                        {opt.label || opt.value}
+                        {props.toDisplayValue(opt)}
                      </LabelText>
                   </TouchableHighlight>
                ))}
