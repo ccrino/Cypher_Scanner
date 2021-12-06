@@ -15,12 +15,16 @@ import Character, {
    LinkSource,
    LinkType,
    Skill,
-   SpecialAbility,
+   Ability,
    StatType,
+   ItemType,
 } from '../Character';
-import {makeListSubChangeHandler} from '../StateHandlers';
+import {
+   makeListSubChangeHandler,
+   useNextId,
+} from '../StateHandlers';
 import {useTheme} from '../Theme';
-import {OnListChange, OnListSubChange} from '../types';
+import {OnListSubChange} from '../types';
 import {
    CharacterContext,
    useCharacterBySelector,
@@ -100,27 +104,10 @@ const styles = StyleSheet.create({
 export const AttacksList: React.FC<{}> = () => {
    const [AttackData, setAttackData] =
       useCharacterProp('attacks');
-   const nextId = useMemo(() => {
-      let res = 0;
-      if (AttackData) {
-         for (const attack of AttackData) {
-            res = Math.max(attack.id, res);
-         }
-      }
-      return res + 1;
-   }, [AttackData]);
+   const nextId = useNextId(AttackData);
 
    const setAttackSubItem =
       makeListSubChangeHandler(setAttackData);
-
-   const renderChild = (item: Attack) => {
-      return (
-         <AttackItem
-            {...item}
-            onChange={setAttackSubItem}
-         />
-      );
-   };
 
    const theme = useTheme();
    const color = {
@@ -132,7 +119,12 @@ export const AttacksList: React.FC<{}> = () => {
          <DraggableList
             data={AttackData}
             setData={setAttackData}
-            renderChild={renderChild}
+            renderChild={(item: Attack) => (
+               <AttackItem
+                  {...item}
+                  onSubItemChange={setAttackSubItem}
+               />
+            )}
          />
          <TouchableOpacity
             style={[styles.listNewItemFooter, color]}
@@ -152,7 +144,6 @@ export const AttacksList: React.FC<{}> = () => {
 type DamageTypeOption = {
    value: StatType;
 };
-
 const damageTypeOptions: DamageTypeOption[] = [
    {value: 'might'},
    {value: 'speed'},
@@ -160,47 +151,38 @@ const damageTypeOptions: DamageTypeOption[] = [
 ];
 
 interface AttackItemProps extends Attack {
-   onChange: OnListSubChange<Attack>;
+   onSubItemChange: OnListSubChange<Attack>;
 }
 
 const AttackItem: React.FC<AttackItemProps> = (
    props: AttackItemProps,
 ) => {
    const [isExpanded, setIsExpanded] = useState(false);
-   const nextId = useMemo(() => {
-      let res = 0;
-      if (props.links) {
-         for (const link of props.links) {
-            res = Math.max(res, link.id);
-         }
-      }
-      return res + 1;
-   }, [props.links]);
+   const linkData = props.links ?? [];
+   const nextId = useNextId(linkData);
 
    const setLinkData = (
       action: SetStateAction<LinkType[]>,
    ) => {
       let val: LinkType[];
       if (typeof action === 'function') {
-         val = action(props.links ?? []);
+         val = action(linkData);
       } else {
          val = action;
       }
-      props.onChange?.(props.id, 'links', val);
+      props.onSubItemChange?.(props.id, 'links', val);
    };
 
-   const makeLink = (source: LinkSource, id: number) => {
-      const newLinkData = (props.links ?? []).concat({
-         id: nextId,
-         linkSource: source,
-         linkId: id,
-      });
-      props.onChange?.(props.id, 'links', newLinkData);
-   };
-
-   const renderChild = (item: LinkType) => {
-      return <LinkHost {...item} />;
-   };
+   const makeLink = (source: LinkSource, id: number) =>
+      props.onSubItemChange?.(
+         props.id,
+         'links',
+         linkData.concat({
+            id: nextId,
+            linkSource: source,
+            linkId: id,
+         }),
+      );
 
    const theme = useTheme();
    const color = {
@@ -214,7 +196,11 @@ const AttackItem: React.FC<AttackItemProps> = (
             <TextField
                defaultValue={props.name}
                onChangeText={text =>
-                  props.onChange?.(props.id, 'name', text)
+                  props.onSubItemChange?.(
+                     props.id,
+                     'name',
+                     text,
+                  )
                }
                style={styles.nameField}
             />
@@ -230,7 +216,7 @@ const AttackItem: React.FC<AttackItemProps> = (
                   <SmallOrbNumberInput
                      initialValue={props.damage}
                      onNumberChange={val =>
-                        props.onChange?.(
+                        props.onSubItemChange?.(
                            props.id,
                            'damage',
                            val,
@@ -249,7 +235,7 @@ const AttackItem: React.FC<AttackItemProps> = (
                   <DiamondToggle
                      value={props.ignoresArmor}
                      onValueChange={val =>
-                        props.onChange?.(
+                        props.onSubItemChange?.(
                            props.id,
                            'ignoresArmor',
                            val,
@@ -262,7 +248,7 @@ const AttackItem: React.FC<AttackItemProps> = (
                   style={[styles.descField, color]}
                   value={props.description}
                   onChangeText={text =>
-                     props.onChange?.(
+                     props.onSubItemChange?.(
                         props.id,
                         'description',
                         text,
@@ -270,9 +256,11 @@ const AttackItem: React.FC<AttackItemProps> = (
                   }
                />
                <DraggableList
-                  data={props.links ?? []}
+                  data={linkData}
                   setData={setLinkData}
-                  renderChild={renderChild}
+                  renderChild={(item: LinkType) => (
+                     <LinkHost {...item} />
+                  )}
                />
                <NewLinkManager onNewLink={makeLink} />
             </>
@@ -287,6 +275,10 @@ const linkSourceOptions: LinkSourceOption[] = [
    {value: 'skill'},
    {value: 'ability'},
 ];
+
+interface LinkableItemType extends ItemType {
+   name?: string;
+}
 
 interface NewLinkManagerProps {
    onNewLink: (source: LinkSource, id: number) => void;
@@ -328,7 +320,7 @@ const NewLinkManager: React.FC<NewLinkManagerProps> = (
          }
          return v[0]?.[characterKey];
       },
-   ) ?? []) as Skill[] | Equipment[] | SpecialAbility[];
+   ) ?? []) as LinkableItemType[];
 
    const theme = useTheme();
    const color = {
@@ -344,22 +336,17 @@ const NewLinkManager: React.FC<NewLinkManagerProps> = (
       color: theme.background,
    };
 
-   type idAble = {
-      id: number;
-      name?: string;
-   };
-
    const initialState = () => (
       <TouchableOpacity
          style={[styles.listNewItemFooter, color]}
-         onPress={() => {
+         onPress={() =>
             setLinkState({
                isExpanded: true,
                isReady: false,
                source: undefined,
                index: undefined,
-            });
-         }}>
+            })
+         }>
          <LabelText>create link</LabelText>
       </TouchableOpacity>
    );
@@ -391,7 +378,7 @@ const NewLinkManager: React.FC<NewLinkManagerProps> = (
                style={styles.idPicker}
                options={idOptions}
                toDisplayValue={opt => {
-                  const idOpt = opt as idAble;
+                  const idOpt = opt as LinkableItemType;
                   return idOpt.name ?? idOpt.id.toString();
                }}
                selectedValue={
@@ -422,9 +409,9 @@ const NewLinkManager: React.FC<NewLinkManagerProps> = (
                   styles.listNewItemFooter,
                   declineColor,
                ]}
-               onPress={() => {
-                  setLinkState(initLinkManagerState);
-               }}>
+               onPress={() =>
+                  setLinkState(initLinkManagerState)
+               }>
                <LabelText style={textColor}>
                   cancel
                </LabelText>
@@ -465,16 +452,8 @@ const NewLinkManager: React.FC<NewLinkManagerProps> = (
    );
 };
 
-interface ItemType {
-   id: number;
-}
 const emptyData: ItemType[] = [];
-
-type ItemsSupportedByHost =
-   | SpecialAbility
-   | Skill
-   | Equipment;
-type HostOnListChange = OnListChange<ItemsSupportedByHost>;
+type ItemsSupportedByHost = Ability | Skill | Equipment;
 type HostOnSubListChange =
    OnListSubChange<ItemsSupportedByHost>;
 
@@ -537,37 +516,26 @@ const LinkHost: React.FC<LinkHostProp> = (
       });
    };
 
-   const setItem: HostOnListChange = (id, newItem) => {
-      setData(s => {
-         const prevData = s[characterKey] as any;
-         const newData = prevData.slice();
-         newData[
-            newData.findIndex((i: any) => i.id === id)
-         ] = newItem;
-         return {...s, [characterKey]: newData};
-      });
-   };
-
    switch (linkSource) {
       case 'ability':
          return (
             <AbilityItem
-               {...(item as SpecialAbility)}
-               onChange={setItem}
+               {...(item as Ability)}
+               onSubItemChange={setItemSubItem}
             />
          );
       case 'item':
          return (
             <EquipmentItem
                {...(item as Equipment)}
-               onChange={setItem}
+               onSubItemChange={setItemSubItem}
             />
          );
       case 'skill':
          return (
             <SkillItem
                {...(item as Skill)}
-               onChange={setItemSubItem}
+               onSubItemChange={setItemSubItem}
             />
          );
    }

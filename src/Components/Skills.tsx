@@ -1,4 +1,4 @@
-import React, {useMemo} from 'react';
+import React from 'react';
 import {
    StyleSheet,
    TouchableOpacity,
@@ -15,7 +15,10 @@ import {
 import {useTheme} from '../Theme';
 import {useCharacterProp} from '../useCharacter';
 import {Skill} from '../Character';
-import {makeListSubChangeHandler} from '../StateHandlers';
+import {
+   makeListSubChangeHandler,
+   useNextId,
+} from '../StateHandlers';
 import {OnListSubChange} from '../types';
 
 const styles = StyleSheet.create({
@@ -52,24 +55,10 @@ const styles = StyleSheet.create({
 export const CharacterSkills: React.FC<{}> = () => {
    const [skillData, setSkillData] =
       useCharacterProp('skills');
-   const nextId = useMemo(() => {
-      let res = 0;
-      if (skillData) {
-         for (const skill of skillData) {
-            res = Math.max(res, skill.id);
-         }
-      }
-      return res + 1;
-   }, [skillData]);
+   const nextId = useNextId(skillData);
 
    const setSkillSubItem =
       makeListSubChangeHandler(setSkillData);
-
-   const renderChild = (item: Skill) => {
-      return (
-         <SkillItem {...item} onChange={setSkillSubItem} />
-      );
-   };
 
    const theme = useTheme();
    const color = {
@@ -95,7 +84,12 @@ export const CharacterSkills: React.FC<{}> = () => {
          <DraggableList
             data={skillData}
             setData={setSkillData}
-            renderChild={renderChild}
+            renderChild={(item: Skill) => (
+               <SkillItem
+                  {...item}
+                  onSubItemChange={setSkillSubItem}
+               />
+            )}
          />
          <TouchableOpacity
             style={[styles.newSkillFooter, color]}
@@ -113,7 +107,7 @@ export const CharacterSkills: React.FC<{}> = () => {
 };
 
 interface SkillListItemProps extends Skill {
-   onChange?: OnListSubChange<Skill>;
+   onSubItemChange?: OnListSubChange<Skill>;
 }
 
 export const SkillItem: React.FC<SkillListItemProps> = (
@@ -131,25 +125,37 @@ export const SkillItem: React.FC<SkillListItemProps> = (
             defaultValue={props.name}
             style={styles.skillField}
             onChangeText={(text: string) => {
-               props.onChange?.(props.id, 'name', text);
+               props.onSubItemChange?.(
+                  props.id,
+                  'name',
+                  text,
+               );
             }}
          />
          <DiamondToggle
             value={props.inability}
             onValueChange={(val: boolean) =>
-               props.onChange?.(props.id, 'inability', val)
+               props.onSubItemChange?.(
+                  props.id,
+                  'inability',
+                  val,
+               )
             }
          />
          <DiamondToggle
             value={props.trained}
             onValueChange={(val: boolean) =>
-               props.onChange?.(props.id, 'trained', val)
+               props.onSubItemChange?.(
+                  props.id,
+                  'trained',
+                  val,
+               )
             }
          />
          <DiamondToggle
             value={props.specialized}
             onValueChange={(val: boolean) =>
-               props.onChange?.(
+               props.onSubItemChange?.(
                   props.id,
                   'specialized',
                   val,

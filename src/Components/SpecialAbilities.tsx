@@ -4,8 +4,13 @@ import {
    TouchableOpacity,
    View,
 } from 'react-native';
-import {SpecialAbility, StatType} from '../Character';
+import {Ability as Ability, StatType} from '../Character';
+import {
+   makeListSubChangeHandler,
+   useNextId,
+} from '../StateHandlers';
 import {useTheme} from '../Theme';
+import {OnListSubChange} from '../types';
 import {useCharacterProp} from '../useCharacter';
 import {
    DraggableList,
@@ -33,40 +38,25 @@ const styles = StyleSheet.create({
       flexDirection: 'row',
       alignItems: 'center',
    },
-   expCol: {
+   listItemSubHeader: {
       flexDirection: 'row',
       marginBottom: 8,
       justifyContent: 'space-between',
       alignItems: 'center',
       zIndex: 99,
    },
-   expRow: {
-      flexDirection: 'column',
-      flexGrow: 1,
-   },
    nameField: {
       flexGrow: 1,
       paddingTop: 8,
       borderWidth: 0,
    },
-   costField: {
-      textAlign: 'center',
-      margin: 5,
-      fontSize: 20,
-      paddingTop: 5,
-      height: 40,
-      width: 40,
-      minWidth: 40,
-      borderWidth: 1,
-      borderRadius: 20,
-   },
-   pickerField: {
+   pickerWidth: {
       width: 90,
    },
    descField: {
       borderWidth: 1,
    },
-   newAbilityFooter: {
+   newItemFooter: {
       height: 20,
       marginTop: 5,
       paddingTop: 4,
@@ -78,26 +68,10 @@ export const SpecialAbilities: React.FC<{}> = () => {
    const [abilityData, setAbilityData] = useCharacterProp(
       'specialAbilities',
    );
-   let nextId = 0;
+   const nextId = useNextId(abilityData);
 
-   const setAbilityItem = (
-      id: number,
-      ability: SpecialAbility,
-   ) => {
-      setAbilityData((s: SpecialAbility[]) => {
-         const newAbilityData = s.slice();
-         newAbilityData[s.findIndex(i => i.id === id)] =
-            ability;
-         return newAbilityData;
-      });
-   };
-
-   const renderChild = (item: SpecialAbility) => {
-      nextId = Math.max(nextId, item.id);
-      return (
-         <AbilityItem {...item} onChange={setAbilityItem} />
-      );
-   };
+   const setAbilitySubItem =
+      makeListSubChangeHandler(setAbilityData);
 
    const theme = useTheme();
    const color = {
@@ -109,30 +83,35 @@ export const SpecialAbilities: React.FC<{}> = () => {
          <DraggableList
             data={abilityData}
             setData={setAbilityData}
-            renderChild={renderChild}
+            renderChild={(item: Ability) => (
+               <AbilityItem
+                  {...item}
+                  onSubItemChange={setAbilitySubItem}
+               />
+            )}
          />
          <TouchableOpacity
-            style={[styles.newAbilityFooter, color]}
-            onPress={() => {
-               const newAbilityData = abilityData.concat({
-                  id: nextId + 1,
-               });
-               setAbilityData(newAbilityData);
-            }}>
+            style={[styles.newItemFooter, color]}
+            onPress={() =>
+               setAbilityData(
+                  abilityData.concat({
+                     id: nextId,
+                  }),
+               )
+            }>
             <LabelText>new ability</LabelText>
          </TouchableOpacity>
       </Section>
    );
 };
 
-interface AbilityItemProps extends SpecialAbility {
-   onChange: (id: number, item: SpecialAbility) => void;
+interface AbilityItemProps extends Ability {
+   onSubItemChange: OnListSubChange<Ability>;
 }
 
 type CostPoolOption = {
    value: StatType;
 };
-
 const costPoolOptions: CostPoolOption[] = [
    {value: 'might'},
    {value: 'speed'},
@@ -152,25 +131,12 @@ export const AbilityItem: React.FC<AbilityItemProps> = (
       borderColor: theme.secondary,
    };
 
-   const sendUpdate = <K extends keyof SpecialAbility>(
-      key: K,
-      val: SpecialAbility[K],
-   ) => {
-      const newAbilityData: SpecialAbility = {
-         ...(props as SpecialAbility),
-      };
-      newAbilityData[key] = val;
-      props.onChange?.(props.id, newAbilityData);
-   };
-
    const makeCostText = () => {
       return (
          (props.hasCost && props.cost && props.costPool
-            ? '(' +
-              props.cost +
-              (props.costPlus ? '+ ' : ' ') +
-              props.costPool +
-              ' pts) '
+            ? `(${props.cost}${props.costPlus ? '+' : ''} ${
+                 props.costPool
+              } pts)`
             : '') + (props.enabler ? 'e.' : '')
       );
    };
@@ -183,7 +149,11 @@ export const AbilityItem: React.FC<AbilityItemProps> = (
                defaultValue={props.name}
                style={styles.nameField}
                onChangeText={text =>
-                  sendUpdate('name', text)
+                  props.onSubItemChange?.(
+                     props.id,
+                     'name',
+                     text,
+                  )
                }
             />
             <LabelText>{makeCostText()}</LabelText>
@@ -194,12 +164,16 @@ export const AbilityItem: React.FC<AbilityItemProps> = (
             <RemoveHandle id={props.id} />
          </View>
          {isExpanded && (
-            <View style={styles.expRow}>
-               <View style={styles.expCol}>
+            <>
+               <View style={styles.listItemSubHeader}>
                   <DiamondToggle
                      value={props.hasCost}
                      onValueChange={val =>
-                        sendUpdate('hasCost', val)
+                        props.onSubItemChange?.(
+                           props.id,
+                           'hasCost',
+                           val,
+                        )
                      }>
                      <SmallLabelText>
                         has cost?
@@ -210,7 +184,11 @@ export const AbilityItem: React.FC<AbilityItemProps> = (
                         <TextToggle
                            value={props.costPlus}
                            onValueChange={val =>
-                              sendUpdate('costPlus', val)
+                              props.onSubItemChange?.(
+                                 props.id,
+                                 'costPlus',
+                                 val,
+                              )
                            }>
                            <BigLabelText>
                               {props.costPlus ? '+' : '='}
@@ -219,18 +197,23 @@ export const AbilityItem: React.FC<AbilityItemProps> = (
                         <SmallOrbNumberInput
                            initialValue={props.cost}
                            onNumberChange={val =>
-                              sendUpdate('cost', val)
+                              props.onSubItemChange?.(
+                                 props.id,
+                                 'cost',
+                                 val,
+                              )
                            }
                         />
                         <Picker
                            selectedValue={props.costPool}
                            onValueChange={ind => {
-                              sendUpdate(
+                              props.onSubItemChange?.(
+                                 props.id,
                                  'costPool',
                                  costPoolOptions[ind].value,
                               );
                            }}
-                           style={styles.pickerField}
+                           style={styles.pickerWidth}
                            options={costPoolOptions}
                            toDisplayValue={opt =>
                               (opt as CostPoolOption).value
@@ -241,7 +224,11 @@ export const AbilityItem: React.FC<AbilityItemProps> = (
                   <DiamondToggle
                      value={props.enabler}
                      onValueChange={val =>
-                        sendUpdate('enabler', val)
+                        props.onSubItemChange?.(
+                           props.id,
+                           'enabler',
+                           val,
+                        )
                      }>
                      <SmallLabelText>
                         enabler?
@@ -252,10 +239,14 @@ export const AbilityItem: React.FC<AbilityItemProps> = (
                   style={[styles.descField, color]}
                   value={props.description}
                   onChangeText={text =>
-                     sendUpdate('description', text)
+                     props.onSubItemChange?.(
+                        props.id,
+                        'description',
+                        text,
+                     )
                   }
                />
-            </View>
+            </>
          )}
       </View>
    );

@@ -4,7 +4,7 @@ import {
    TouchableOpacity,
    View,
 } from 'react-native';
-import {Cypher} from '../Character';
+import {Cypher, CypherForm} from '../Character';
 import {useCharacterProp} from '../useCharacter';
 import {
    DraggableList,
@@ -23,8 +23,12 @@ import {
    ParagraphField,
    TextField,
 } from './Text';
-import {OnListChange} from '../types';
+import {OnListSubChange} from '../types';
 import {useTheme} from '../Theme';
+import {
+   makeListSubChangeHandler,
+   useNextId,
+} from '../StateHandlers';
 
 const styles = StyleSheet.create({
    listItem: {
@@ -55,7 +59,7 @@ const styles = StyleSheet.create({
       zIndex: 99,
    },
    pickerWidth: {
-      width: 90,
+      minWidth: 100,
    },
    descField: {
       borderWidth: 1,
@@ -81,29 +85,10 @@ export const Cyphers: React.FC<{}> = () => {
       useCharacterProp('cyphers');
    const [cypherLimit, setCypherLimit] =
       useCharacterProp('cypherLimit');
-   let nextId = 0;
+   const nextId = useNextId(cypherData);
 
-   const setCypherItem = (id: number, cypher: Cypher) => {
-      setCypherData((s: Cypher[]) => {
-         const newCypherData = s.slice();
-         newCypherData[s.findIndex(i => i.id === id)] =
-            cypher;
-         return newCypherData;
-      });
-   };
-
-   const renderChild = (item: Cypher, ind: number) => {
-      nextId = Math.max(nextId, item.id);
-      return (
-         <CypherItem
-            {...item}
-            onChange={setCypherItem}
-            isOverLimit={
-               !!(cypherLimit && ind >= cypherLimit)
-            }
-         />
-      );
-   };
+   const setCypherSubItem =
+      makeListSubChangeHandler(setCypherData);
 
    const theme = useTheme();
    const color = {
@@ -115,17 +100,26 @@ export const Cyphers: React.FC<{}> = () => {
          <DraggableList
             data={cypherData}
             setData={setCypherData}
-            renderChild={renderChild}
+            renderChild={(item: Cypher, ind: number) => (
+               <CypherItem
+                  {...item}
+                  onChange={setCypherSubItem}
+                  isOverLimit={
+                     !!(cypherLimit && ind >= cypherLimit)
+                  }
+               />
+            )}
          />
          <View style={styles.listFooter}>
             <TouchableOpacity
                style={[styles.listNewItem, color]}
-               onPress={() => {
-                  const newCypherData = cypherData.concat({
-                     id: nextId + 1,
-                  });
-                  setCypherData(newCypherData);
-               }}>
+               onPress={() =>
+                  setCypherData(
+                     cypherData.concat({
+                        id: nextId,
+                     }),
+                  )
+               }>
                <LabelText>new cypher</LabelText>
             </TouchableOpacity>
             <View style={styles.listLimitField}>
@@ -141,13 +135,14 @@ export const Cyphers: React.FC<{}> = () => {
 };
 
 interface CypherItemProps extends Cypher {
-   onChange: OnListChange<Cypher>;
+   onChange: OnListSubChange<Cypher>;
    isOverLimit?: boolean;
 }
 
-const formPickerOptions: {
-   value: 'internal' | 'wearable' | 'useable';
-}[] = [
+interface CypherFormOption {
+   value: CypherForm;
+}
+const cypherFormOptions: CypherFormOption[] = [
    {value: 'internal'},
    {value: 'wearable'},
    {value: 'useable'},
@@ -157,18 +152,6 @@ const CypherItem: React.FC<CypherItemProps> = (
    props: CypherItemProps,
 ) => {
    const [isExpanded, setIsExpanded] = useState(false);
-
-   const sendUpdate = <K extends keyof Cypher>(
-      key: K,
-      val: Cypher[K],
-   ) => {
-      const newCypherData: Cypher = {
-         ...(props as Cypher),
-      };
-      newCypherData[key] = val;
-      props.onChange?.(props.id, newCypherData);
-   };
-
    const theme = useTheme();
    const color = {
       borderColor: theme.secondary,
@@ -184,7 +167,7 @@ const CypherItem: React.FC<CypherItemProps> = (
             <TextField
                defaultValue={props.name}
                onChangeText={text =>
-                  sendUpdate('name', text)
+                  props.onChange?.(props.id, 'name', text)
                }
                style={styles.nameField}
             />
@@ -205,17 +188,25 @@ const CypherItem: React.FC<CypherItemProps> = (
                   <SmallOrbNumberInput
                      initialValue={props.level}
                      onNumberChange={level =>
-                        sendUpdate('level', level)
+                        props.onChange?.(
+                           props.id,
+                           'level',
+                           level,
+                        )
                      }>
                      <LabelText>Level</LabelText>
                   </SmallOrbNumberInput>
                   <Picker
                      selectedValue={props.form}
-                     options={formPickerOptions}
+                     options={cypherFormOptions}
+                     toDisplayValue={option =>
+                        (option as CypherFormOption).value
+                     }
                      onValueChange={ind =>
-                        sendUpdate(
+                        props.onChange?.(
+                           props.id,
                            'form',
-                           formPickerOptions[ind].value,
+                           cypherFormOptions[ind].value,
                         )
                      }
                      style={styles.pickerWidth}
@@ -225,7 +216,11 @@ const CypherItem: React.FC<CypherItemProps> = (
                   style={[styles.descField, color]}
                   value={props.description}
                   onChangeText={text =>
-                     sendUpdate('description', text)
+                     props.onChange?.(
+                        props.id,
+                        'description',
+                        text,
+                     )
                   }
                />
             </>

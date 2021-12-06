@@ -19,8 +19,12 @@ import {
    ParagraphField,
    TextField,
 } from './Text';
-import {OnListChange} from '../types';
+import {OnListSubChange} from '../types';
 import {useTheme} from '../Theme';
+import {
+   makeListSubChangeHandler,
+   useNextId,
+} from '../StateHandlers';
 
 const styles = StyleSheet.create({
    listItem: {
@@ -65,29 +69,11 @@ export const EquipmentList: React.FC<{}> = () => {
    const [EquipmentData, setEquipmentData] =
       useCharacterProp('equipment');
    const [shins, setShins] = useCharacterProp('shins');
-   let nextId = 0;
+   const nextId = useNextId(EquipmentData);
 
-   const setEquipmentItem = (
-      id: number,
-      equipment: Equipment,
-   ) => {
-      setEquipmentData((s: Equipment[]) => {
-         const newEquipmentData = s.slice();
-         newEquipmentData[s.findIndex(i => i.id === id)] =
-            equipment;
-         return newEquipmentData;
-      });
-   };
-
-   const renderChild = (item: Equipment) => {
-      nextId = Math.max(nextId, item.id);
-      return (
-         <EquipmentItem
-            {...item}
-            onChange={setEquipmentItem}
-         />
-      );
-   };
+   const setEquipmentSubItem = makeListSubChangeHandler(
+      setEquipmentData,
+   );
 
    const theme = useTheme();
    const color = {
@@ -99,18 +85,23 @@ export const EquipmentList: React.FC<{}> = () => {
          <DraggableList
             data={EquipmentData}
             setData={setEquipmentData}
-            renderChild={renderChild}
+            renderChild={(item: Equipment) => (
+               <EquipmentItem
+                  {...item}
+                  onSubItemChange={setEquipmentSubItem}
+               />
+            )}
          />
          <View style={styles.listFooter}>
             <TouchableOpacity
                style={[styles.listNewItem, color]}
-               onPress={() => {
-                  const newEquipmentData =
+               onPress={() =>
+                  setEquipmentData(
                      EquipmentData.concat({
-                        id: nextId + 1,
-                     });
-                  setEquipmentData(newEquipmentData);
-               }}>
+                        id: nextId,
+                     }),
+                  )
+               }>
                <LabelText>new item</LabelText>
             </TouchableOpacity>
             <View style={styles.listShinField}>
@@ -126,7 +117,7 @@ export const EquipmentList: React.FC<{}> = () => {
 };
 
 interface EquipmentItemProps extends Equipment {
-   onChange: OnListChange<Equipment>;
+   onSubItemChange: OnListSubChange<Equipment>;
 }
 
 export const EquipmentItem: React.FC<EquipmentItemProps> = (
@@ -134,24 +125,13 @@ export const EquipmentItem: React.FC<EquipmentItemProps> = (
 ) => {
    const [isExpanded, setIsExpanded] = useState(false);
 
-   const sendUpdate = <K extends keyof Equipment>(
-      key: K,
-      val: Equipment[K],
-   ) => {
-      const newEquipmentData: Equipment = {
-         ...(props as Equipment),
-      };
-      newEquipmentData[key] = val;
-      props.onChange?.(props.id, newEquipmentData);
+   const theme = useTheme();
+   const color = {
+      borderColor: theme.secondary,
    };
 
    const makeCountText = () => {
       return props.count ? props.count.toString() : '';
-   };
-
-   const theme = useTheme();
-   const color = {
-      borderColor: theme.secondary,
    };
 
    return (
@@ -161,7 +141,11 @@ export const EquipmentItem: React.FC<EquipmentItemProps> = (
             <TextField
                defaultValue={props.name}
                onChangeText={text =>
-                  sendUpdate('name', text)
+                  props.onSubItemChange?.(
+                     props.id,
+                     'name',
+                     text,
+                  )
                }
                style={styles.nameField}
             />
@@ -178,7 +162,11 @@ export const EquipmentItem: React.FC<EquipmentItemProps> = (
                   <SmallOrbNumberInput
                      initialValue={props.count}
                      onNumberChange={count =>
-                        sendUpdate('count', count)
+                        props.onSubItemChange?.(
+                           props.id,
+                           'count',
+                           count,
+                        )
                      }>
                      <LabelText>count</LabelText>
                   </SmallOrbNumberInput>
@@ -187,7 +175,11 @@ export const EquipmentItem: React.FC<EquipmentItemProps> = (
                   style={[styles.descField, color]}
                   value={props.description}
                   onChangeText={text =>
-                     sendUpdate('description', text)
+                     props.onSubItemChange?.(
+                        props.id,
+                        'description',
+                        text,
+                     )
                   }
                />
             </>

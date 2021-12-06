@@ -49,7 +49,7 @@ export default class Character {
    armor?: number;
 
    //Lists
-   specialAbilities: SpecialAbility[] = [];
+   specialAbilities: Ability[] = [];
    cyphers: Cypher[] = [];
    skills: Skill[] = [];
    equipment: Equipment[] = [];
@@ -66,11 +66,12 @@ export default class Character {
 
 export type StatType = 'might' | 'speed' | 'intellect';
 
-interface ListItem {
+export type ItemType = ListItem;
+export interface ListItem {
    id: number;
 }
 
-export interface SpecialAbility extends ListItem {
+export interface Ability extends ListItem {
    name?: string;
    enabler?: boolean;
    hasCost?: boolean;
@@ -80,10 +81,15 @@ export interface SpecialAbility extends ListItem {
    description?: string;
 }
 
+export type CypherForm =
+   | 'internal'
+   | 'wearable'
+   | 'useable';
+
 export interface Cypher extends ListItem {
    name?: string;
    level?: number;
-   form?: 'internal' | 'wearable' | 'useable';
+   form?: CypherForm;
    description?: string;
 }
 
