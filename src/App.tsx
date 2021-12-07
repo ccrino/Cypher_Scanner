@@ -10,6 +10,7 @@
 
 import React from 'react';
 import {
+   FlatList,
    SafeAreaView,
    ScrollView,
    //StatusBar,
@@ -38,6 +39,9 @@ const styles = StyleSheet.create({
    },
    floatPane: {
       width: 300,
+   },
+   fillPane: {
+      flexGrow: 1,
    },
    scrollSpacer: {
       paddingRight: 10,
@@ -87,39 +91,53 @@ const CharacterSheetViewer: React.FC<{}> = () => {
                <CharacterAdvancement />
             </ScrollView>
          </View>
-         <ScrollView
-            contentInsetAdjustmentBehavior="automatic"
-            style={backgroundStyle}>
+         <View style={[styles.fillPane, backgroundStyle]}>
             <CharacterSheetRightPane />
-         </ScrollView>
+         </View>
       </SafeAreaView>
    );
 };
 
-const CharacterSheetRightPane: React.FC<{}> = () => {
+const Background: React.FC<{}> = () => {
    const [background, setBackground] =
       useCharacterProp('background');
+
+   return (
+      <Section title="Background" color="yellow">
+         <ParagraphField
+            value={background}
+            onChangeText={setBackground}
+         />
+      </Section>
+   );
+};
+
+const Notes: React.FC<{}> = () => {
    const [notes, setNotes] = useCharacterProp('notes');
 
    return (
-      <View>
-         <SpecialAbilities />
-         <Cyphers />
-         <CharacterSkills />
-         <EquipmentList />
-         <AttacksList />
-         <Section title="Background" color="yellow">
-            <ParagraphField
-               value={background}
-               onChangeText={setBackground}
-            />
-         </Section>
-         <Section title="Notes" color="orange">
-            <ParagraphField
-               value={notes}
-               onChangeText={setNotes}
-            />
-         </Section>
-      </View>
+      <Section title="Notes" color="orange">
+         <ParagraphField
+            value={notes}
+            onChangeText={setNotes}
+         />
+      </Section>
    );
 };
+
+const rightPaneData = [
+   SpecialAbilities,
+   Cyphers,
+   CharacterSkills,
+   EquipmentList,
+   AttacksList,
+   Background,
+   Notes,
+];
+
+const CharacterSheetRightPane: React.FC<{}> = () => (
+   <FlatList
+      data={rightPaneData}
+      renderItem={val => <val.item />}
+   />
+);
