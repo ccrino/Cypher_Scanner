@@ -69,7 +69,7 @@ interface Theme {
 
 export type AccentColor = KeysOfExcept<
    Theme,
-   `${string}${'y' | 'ht' | 'd'}`
+   `${string}${'y' | 'ht' | 'nd'}`
 >;
 
 // export type AccentColor =
