@@ -1,6 +1,8 @@
 import React, {
    Dispatch,
    SetStateAction,
+   useCallback,
+   useRef,
    useState,
 } from 'react';
 import {Motion} from 'react-motion';
@@ -82,6 +84,7 @@ interface DraggableListProps {
  * from the data and renderitem props.
  * items with a DragHandle component can be used
  * to re-order the list.
+ * items with a RemoveHandle component can delete themselves
  * @param props @see DraggableListProps
  */
 export const DraggableList: React.FC<DraggableListProps> = (
@@ -90,97 +93,89 @@ export const DraggableList: React.FC<DraggableListProps> = (
    //state
    const [dragState, setDragState] =
       useState(initDragState);
-   const [heights, setHeights] = useState(initHeights);
+
+   //non-render state
+   const heightRef = useRef(initHeights);
 
    //dragHandlers
-   const onTouchStart = (
-      e: GestureResponderEvent,
-      id: number,
-   ) => {
-      const {pageY, locationY} = e.nativeEvent;
-      setDragState({
-         topDeltaY: pageY - locationY,
-         touchY: locationY,
-         isDragging: true,
-         draggedItemId: id,
-      });
-   };
+   const onTouchStart = useCallback(
+      (e: GestureResponderEvent, id: number) => {
+         const {pageY, locationY} = e.nativeEvent;
+         setDragState({
+            topDeltaY: pageY - locationY,
+            touchY: locationY,
+            isDragging: true,
+            draggedItemId: id,
+         });
+      },
+      [],
+   );
 
-   const onTouchMove = (
-      e: GestureResponderEvent,
-      _id: number,
-   ) => {
-      e.preventDefault();
-      if (dragState.isDragging) {
+   const onTouchMove = useCallback(
+      (e: GestureResponderEvent, _id: number) => {
+         e.preventDefault();
          const {pageY} = e.nativeEvent;
          const touchY = pageY - dragState.topDeltaY;
          setDragState(s => ({...s, touchY: touchY}));
-      }
-   };
+      },
+      [dragState.topDeltaY],
+   );
 
-   const onTouchEnd = (
-      e: GestureResponderEvent,
-      _id: number,
-   ) => {
-      const {pageY} = e.nativeEvent;
-      let touchY = pageY - dragState.topDeltaY;
+   const onTouchEnd = useCallback(
+      (e: GestureResponderEvent, _id: number) => {
+         const {pageY} = e.nativeEvent;
+         let touchY = pageY - dragState.topDeltaY;
 
-      const fromRow = props.data.findIndex(
-         i => i.id === dragState.draggedItemId,
-      );
+         const fromRow = props.data.findIndex(
+            i => i.id === dragState.draggedItemId,
+         );
 
-      let toRow: number;
-      if (touchY < 0) {
-         toRow = 0;
-         for (let i = fromRow - 1; i >= 0; i--) {
-            if ((touchY += heights[i]) > 0) {
-               toRow = i;
-               break;
+         let toRow: number;
+         if (touchY < 0) {
+            toRow = 0;
+            for (let i = fromRow - 1; i >= 0; i--) {
+               if ((touchY += heightRef.current[i]) > 0) {
+                  toRow = i;
+                  break;
+               }
+            }
+         } else {
+            toRow = heightRef.current.length;
+            for (
+               let i = fromRow;
+               i < heightRef.current.length;
+               i++
+            ) {
+               if ((touchY -= heightRef.current[i]) < 0) {
+                  toRow = i;
+                  break;
+               }
             }
          }
-      } else {
-         toRow = heights.length;
-         for (let i = fromRow; i < heights.length; i++) {
-            if ((touchY -= heights[i]) < 0) {
-               toRow = i;
-               break;
-            }
+
+         if (fromRow !== toRow) {
+            const newData = props.data.slice();
+            const val = newData.splice(fromRow, 1)[0];
+            newData.splice(toRow, 0, val);
+            props.setData(newData);
          }
-      }
+         setDragState(initDragState);
+      },
+      [dragState.draggedItemId, dragState.topDeltaY, props],
+   );
 
-      if (fromRow !== toRow) {
-         const newData = props.data.slice();
-         const val = newData.splice(fromRow, 1)[0];
-         newData.splice(toRow, 0, val);
-         props.setData(newData);
-      }
-
-      setDragState(s => ({
-         ...s,
-         isDragging: false,
-         topDeltaY: 0,
-      }));
-   };
-
-   const onRemoveHandler = (id: number) => {
-      const listIndex = props.data.findIndex(
-         i => i.id === id,
-      );
-      setHeights(h => {
-         const _h = h.slice();
-         _h.splice(listIndex, 1);
-         return _h;
-      });
-      props.setData(d => {
-         const _d = d.slice();
-         _d.splice(listIndex, 1);
-         return _d;
-      });
-   };
-
-   //calculate wrapper height
-   const wrapperHeight =
-      heights.reduce((pv, cv) => cv + pv, 0) || 10;
+   const onRemoveHandler = useCallback(
+      (id: number) => {
+         const listIndex = props.data.findIndex(
+            i => i.id === id,
+         );
+         heightRef.current.splice(listIndex, 1);
+         props.setData(d =>
+            d.filter((_v, i) => i !== listIndex),
+         );
+      },
+      [props],
+   );
 
    //function to render a list item
    const mapRenderItems = (item: ItemType, ind: number) => {
@@ -202,18 +197,14 @@ export const DraggableList: React.FC<DraggableListProps> = (
                return (
                   <View
                      onLayout={e => {
-                        const calculatedHeight =
+                        const newHeight =
                            e?.nativeEvent?.layout?.height;
-                        setHeights(arr => {
-                           const newArr = arr.slice();
-                           if (!calculatedHeight) {
-                              newArr.splice(ind, 1);
-                           } else {
-                              newArr[ind] =
-                                 calculatedHeight;
-                           }
-                           return newArr;
-                        });
+                        if (newHeight) {
+                           heightRef.current[ind] =
+                              newHeight;
+                        } else {
+                           heightRef.current.splice(ind, 1);
+                        }
                      }}
                      style={computedStyle}>
                      {props.renderChild(item, ind)}
@@ -232,9 +223,7 @@ export const DraggableList: React.FC<DraggableListProps> = (
             onTouchEnd,
             onRemoveHandler,
          ]}>
-         <View style={{height: wrapperHeight}}>
-            {props.data.map(mapRenderItems)}
-         </View>
+         <View>{props.data.map(mapRenderItems)}</View>
       </DraggableContext.Provider>
    );
 };
@@ -248,13 +237,8 @@ export const DraggableList: React.FC<DraggableListProps> = (
 export const DragHandle: React.FC<ItemType> = (
    props: ItemType,
 ) => {
-   const [
-      onTouchStart,
-      onTouchMove,
-      onTouchEnd,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      _onRemove,
-   ] = useContext(DraggableContext);
+   const [onTouchStart, onTouchMove, onTouchEnd] =
+      useContext(DraggableContext);
 
    const theme = useTheme();
    const color = {
@@ -275,6 +259,12 @@ export const DragHandle: React.FC<ItemType> = (
    );
 };
 
+/**
+ * @description Remove handle component
+ * should be used within a draggable list item,
+ * this is where the remove item action is initiated from.
+ * @param props id of the containing item
+ */
 export const RemoveHandle: React.FC<ItemType> = (
    props: ItemType,
 ) => {
