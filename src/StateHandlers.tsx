@@ -19,16 +19,12 @@ export function makeListSubChangeHandler<
 >(
    setData: Dispatch<SetStateAction<T[]>>,
 ): OnListSubChange<T> {
-   return (id, key, value) =>
-      setData((s: T[]) => {
-         const ind = s.findIndex(i => i.id === id);
-         const newData = s.slice();
-         newData[ind] = {
-            ...newData[ind],
-            [key]: value,
-         };
-         return newData;
-      });
+   return (id, key, value): void =>
+      setData((s: T[]) =>
+         s.map(v =>
+            v.id === id ? {...v, [key]: value} : v,
+         ),
+      );
 }
 
 /**
@@ -37,13 +33,8 @@ export function makeListSubChangeHandler<
  * @returns the smallest numeric id greater than all current ids
  */
 export function useNextId(list: ItemType[]) {
-   return useMemo(() => {
-      let maxId = 0;
-      if (list) {
-         for (const item of list) {
-            maxId = Math.max(maxId, item.id);
-         }
-      }
-      return maxId + 1;
-   }, [list]);
+   return useMemo(
+      () => 1 + Math.max(-1, ...list?.map?.(i => i.id)),
+      [list],
+   );
 }
