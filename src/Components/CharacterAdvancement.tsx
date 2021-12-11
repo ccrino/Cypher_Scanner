@@ -1,14 +1,13 @@
 import React from 'react';
 import {StyleSheet, View} from 'react-native';
 import {useCharacterProp} from '../useCharacter';
-import {NumericBaseInput} from './Inputs';
+import {DiamondToggle, NumericBaseInput} from './Inputs';
 import {HorizontalBar} from './Layout';
 import {
    BigLabelText,
    LabelText,
    SmallLabelText,
 } from './Text';
-import {ToggleField} from './ToggleField';
 
 export const CharacterAdvancement: React.FC<{}> = () => {
    const [tier, setTier] = useCharacterProp('tier');
@@ -102,10 +101,9 @@ const ToggleSection: React.FC<ToggleSectionProps> = (
                {props.subtext}
             </SmallLabelText>
          </View>
-         <ToggleField
-            style={styles.rightAlign}
+         <DiamondToggle
             value={props.value}
-            onToggle={props.onToggle}
+            onValueChange={props.onToggle}
          />
       </View>
    );
