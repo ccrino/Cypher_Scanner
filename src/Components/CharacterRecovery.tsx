@@ -1,8 +1,7 @@
 import React from 'react';
 import {StyleSheet, View} from 'react-native';
-import {useTheme} from '../Theme';
 import {useCharacterProp} from '../useCharacter';
-import {DamageTrack, ToggleTrack} from './DamageTrack';
+import {ToggleTrack} from './ToggleTrack';
 import {SmallOrbNumberInput} from './Inputs';
 import {HorizontalBar} from './Layout';
 import {BigLabelText, LabelText} from './Text';
@@ -18,8 +17,11 @@ export const CharacterRecovery: React.FC<{}> = () => {
       useCharacterProp('recoveryHour');
    const [recoveryTenHour, setRecoveryTenHour] =
       useCharacterProp('recoveryTenHour');
-
-   const theme = useTheme();
+   const [Dead, setDead] = useCharacterProp('dead');
+   const [Debilitated, setDebilitated] =
+      useCharacterProp('debilitated');
+   const [Impaired, setImpaired] =
+      useCharacterProp('impaired');
 
    return (
       <View style={styles.body}>
@@ -37,25 +39,25 @@ export const CharacterRecovery: React.FC<{}> = () => {
                style={styles.trackBack}
                data={[
                   {
-                     color: theme.violet,
+                     color: 'violet',
                      title: '10 hours',
                      value: recoveryTenHour,
                      onToggle: setRecoveryTenHour,
                   },
                   {
-                     color: theme.blue,
+                     color: 'blue',
                      title: '1 hour',
                      value: recoveryHour,
                      onToggle: setRecoveryHour,
                   },
                   {
-                     color: theme.cyan,
+                     color: 'cyan',
                      title: '10 mins',
                      value: recoveryMinute,
                      onToggle: setRecoveryMinute,
                   },
                   {
-                     color: theme.green,
+                     color: 'green',
                      title: '1 action',
                      value: recoveryAction,
                      onToggle: setRecoveryAction,
@@ -63,7 +65,28 @@ export const CharacterRecovery: React.FC<{}> = () => {
                ]}
             />
          </View>
-         <DamageTrack />
+         <ToggleTrack
+            data={[
+               {
+                  color: 'yellow',
+                  title: 'Impaired',
+                  value: Impaired,
+                  onToggle: setImpaired,
+               },
+               {
+                  color: 'orange',
+                  title: 'Debilitated',
+                  value: Debilitated,
+                  onToggle: setDebilitated,
+               },
+               {
+                  color: 'red',
+                  title: 'Dead',
+                  value: Dead,
+                  onToggle: setDead,
+               },
+            ]}
+         />
       </View>
    );
 };
